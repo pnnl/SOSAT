@@ -9,9 +9,9 @@ SOSAT
 .. image:: https://img.shields.io/travis/pnnl/SOSAT.svg
         :target: https://travis-ci.com/pnnl/SOSAT
 
-.. image:: https://readthedocs.org/projects/SOSAT/badge/?version=latest
-        :target: https://SOSAT.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
+.. image:: https://readthedocs.org/projects/sosat/badge/?version=latest
+:target: https://sosat.readthedocs.io/en/latest/?badge=latest
+:alt: Documentation Status
 
 
 .. image:: https://pyup.io/repos/github/pnnl/SOSAT/shield.svg
