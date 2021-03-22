@@ -6,7 +6,7 @@ SOSAT
 .. image:: https://img.shields.io/pypi/v/SOSAT.svg
         :target: https://pypi.python.org/pypi/SOSAT
 
-.. image:: https://img.shields.io/travis/jeff788/SOSAT.svg
+.. image:: https://img.shields.io/travis/pnnl/SOSAT.svg
         :target: https://travis-ci.com/pnnl/SOSAT
 
 .. image:: https://readthedocs.org/projects/SOSAT/badge/?version=latest
@@ -14,7 +14,7 @@ SOSAT
         :alt: Documentation Status
 
 
-.. image:: https://pyup.io/repos/github/jeff788/SOSAT/shield.svg
+.. image:: https://pyup.io/repos/github/pnnl/SOSAT/shield.svg
      :target: https://pyup.io/repos/github/pnnl/SOSAT/
      :alt: Updates
 
