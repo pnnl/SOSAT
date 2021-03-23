@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/jeff788/SOSAT
+    $ git clone git://github.com/pnnl/SOSAT
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/jeff788/SOSAT/tarball/master
+    $ curl -OJL https://github.com/pnnl/SOSAT/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/jeff788/SOSAT
-.. _tarball: https://github.com/jeff788/SOSAT/tarball/master
+.. _Github repo: https://github.com/pnnl/SOSAT
+.. _tarball: https://github.com/pnnl/SOSAT/tarball/master

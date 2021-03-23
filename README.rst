@@ -9,14 +9,13 @@ SOSAT
 .. image:: https://img.shields.io/travis/jeff788/SOSAT.svg
         :target: https://travis-ci.com/pnnl/SOSAT
 
+.. image:: https://coveralls.io/repos/github/pnnl/SOSAT/badge.svg?branch=master
+        :target: https://coveralls.io/github/pnnl/SOSAT?branch=master
+        
+
 .. image:: https://readthedocs.org/projects/SOSAT/badge/?version=latest
         :target: https://SOSAT.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
-
-
-.. image:: https://pyup.io/repos/github/jeff788/SOSAT/shield.svg
-     :target: https://pyup.io/repos/github/pnnl/SOSAT/
-     :alt: Updates
 
 
 
