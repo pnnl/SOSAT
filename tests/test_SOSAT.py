@@ -6,7 +6,6 @@ import pytest
 
 from click.testing import CliRunner
 
-from SOSAT import SOSAT
 from SOSAT import cli
 
 

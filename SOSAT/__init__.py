@@ -3,3 +3,5 @@
 __author__ = """Jeff Burghardt"""
 __email__ = 'jeffrey.burghardt@pnnl.gov'
 __version__ = '0.1.0'
+
+from .SOSAT import StressState
