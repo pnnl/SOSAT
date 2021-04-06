@@ -5,6 +5,8 @@ watchdog==0.9.0
 flake8==3.7.8
 tox==3.14.0
 coverage==4.5.4
+coveralls
+python-coveralls
 Sphinx==3.5.3
 twine
 Click==7.0

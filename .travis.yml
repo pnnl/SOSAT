@@ -4,7 +4,6 @@ python:
 - 3.7
 install:
   - pip install -U tox-travis
-  - if [ "$TRAVIS_PYTHON_VERSION" = "3.8"]; then pip install coveralls coverage -r requirements_dev.txt; fi
 script:
   # Run against the Python interpreter version specified in the tox.ini file
   - tox
