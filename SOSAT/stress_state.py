@@ -9,28 +9,28 @@ class StressState:
     :param depth: the true vertical depth of the point being analyzed
     :type  depth: float
     :param average_overburden_density: average mass density of all overlying
-         formations
+        formations
     :type average_overburden_density: float
     :param pore_pressure: formation pore pressure
     :type pore_pressure: float
     :param depth_unit: unit of measurement for depth
     :type depth_unit: str, optional, see list of units in pint package
-         documentation
+        documentation
     :param density_unit: unit of measurement for mass density
     :type density_unit: str, optional, see list of units in pint package
-         documentation
+        documentation
     :param pressure_unit: unit of measurement for pressure
     :type pressure_unit: str, optional, see list of units in pint package
-         documentation
+        documentation
     :param min_stress_ratio: minimum stress included in the analysis expressed
-         as a fraction of the vertical stress. Default value is 0.4
+        as a fraction of the vertical stress. Default value is 0.4
     :type min_stress_ratio: float
     :param max_stress_ratio: maximum stress included in the analysis expressed
-         as a fraction of the vertical stress. Default value is 2.0
+        as a fraction of the vertical stress. Default value is 2.0
     :type max_stress_ratio: float
     :param nbins: number of bins to use for the horizontal principal
-         stresses. The same number is used for both horizontal
-         principal stresses. Optional with a default value of 200
+        stresses. The same number is used for both horizontal
+        principal stresses. Optional with a default value of 200
     :type nbins: integer
     """
 
@@ -78,6 +78,33 @@ class StressState:
         print("vertical_stress= ", self.vertical_stress, stress_unit)
 
     def regime(self):
+        """Computes the scalar regime parameters for each stress state
+        included in the class. The scalar regime parameter varies from
+        negative one to one. It is defined the vector space where each
+        each stress state is represented by a vector whose head lies
+        at the coordinate (shmax,shmin) and whose tail lies at the
+        spherical stress state where
+
+            shmax = shmin = vertical stress
+
+        The scalar measure of the faulting regime is defined by the
+        dot product of the vector for the given stress state and
+        the unit vector give by
+
+            shmax = shmin = - 1/sqrt(2)
+
+        Using this definition values of the regime parameter between
+        -1 and -sqrt(2)/2 correspond to thrust faulting states,
+        values between -sqrt(2)/2 and sqrt(2)/2 correspond to strike-
+        slip states, and values between sqrt(2)/2 and +1 correspond
+        to normal faulting states.
+
+        :return: An array containing the scalar faulting regime for
+            each stress state included in the StressState object.
+
+        :rtype: array of the same shape as the stress arrays contained
+            in the StressState class
+        """
         num = 1.0 / np.sqrt(2.0) * (2.0 * self.vertical_stress
                                     - self.shmin_grid
                                     - self.shmax_grid)

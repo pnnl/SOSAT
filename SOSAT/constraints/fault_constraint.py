@@ -41,14 +41,19 @@ class FaultConstraint:
         self.min_friction = min_friction
         self.max_friction = max_friction
 
-    """ computes the likelihood of each stress state
-        :param ss: StressState object
-        :type ss: StressState object containing the stress states
-             to be evaluated
-    """
     def likelihood(self,
                    ss):
+        """ Computes the likelihood of each stress state
+        :param ss: StressState object
+        :type ss: StressState object containing the stress states
+          to be evaluated
 
+        :return: An array containing the likelihood for each stress
+          state included in ``ss``
+        :rtype: array of same shape as stress arrays in ``ss``, which
+           is currently a masked meshgrid array containing the bins for
+           the minimum and maximum horizontal stress
+        """
         NFregime = np.sqrt(2.0) * 0.5
         TFregime = -np.sqrt(2.0) * 0.5
         regime = ss.regime()
