@@ -1,4 +1,4 @@
-SOSAT
+Modules
 =====
 
 .. toctree::

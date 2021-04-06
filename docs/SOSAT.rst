@@ -1,13 +1,44 @@
 SOSAT package
 =============
+Module contents
+---------------
+
+.. automodule:: SOSAT
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
 
-SOSAT.SOSAT module
-------------------
+SOSAT.stress_state module
+-------------------------
 
-.. automodule:: SOSAT.SOSAT
+.. automodule:: SOSAT.stress_state
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+SOSAT.core
+----------
+
+.. automodule:: SOSAT.core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+SOSAT.constraints
+-----------------
+
+.. automodule:: SOSAT.constraints
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+SOSAT.constraints.fault_constraint
+----------------------------------
+
+.. automodule:: SOSAT.constraints.fault_constraint
    :members:
    :undoc-members:
    :show-inheritance:
@@ -20,10 +51,3 @@ SOSAT.cli module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: SOSAT
-   :members:
-   :undoc-members:
-   :show-inheritance:
