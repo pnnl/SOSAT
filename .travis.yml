@@ -14,7 +14,7 @@ script:
 #  - if [ "$TRAVIS_PYTHON_VERSION" = "3.8"]; then coveralls; fi
 deploy:
   provider: pypi
-  server: https://test.pypi.python.org/legacy
+  server: https://test.pypi.org/legacy
   distributions: sdist bdist_wheel
   user: jeff788
   password:
