@@ -16,7 +16,7 @@ deploy:
   provider: pypi
   server: https://test.pypi.org/legacy/
   distributions: sdist bdist_wheel
-  user: jeff788
+  username: "__token__"
   password:
     secure: IaxVoTO/DelO/8UbIzn97SKi6RT+hOfydCukAiGGvF5CD4os9oBQYiUrbGJo45y90KtaFfOQ+jFtPhauUzonaJkor4Fk1t4bINHXHgJPzQhtltQuH2V/n4Ng18iZkqxM2FUTKJB1yvilr/jZ1EefUibjvdYy/JKatJm1KulsWKXi74rAQ5Uy7+b5G+PGOAi+XVTQWiqdIoq2k2d/rdil1utwa5pvAz1OL6bLGN2U7IpVfTAZ38lBca9jJhuEpLh3AJMJLqhMZNXwuO2C4B0lbk6ybJm57NCfbXSmbPI6fuvdNt5xpuRpF/zbu2LGqPAWLR0ZCm4hTX3lyRbDSNk5g/RvNbi67Hc7pF8i7+MSCUfdP50WdYIRKQha87ysV7onZEHVsFJ72RiKt9v3zmPLIOAB/7YIkfVOil8u3UfAABlFEaaztQc+ELwBjDgZKmcgLoUaxZ0Lxb17fs6vS/jxf8rCQnJMER/fn5gR2Lzt4Ve4XnO6hZlX7WF2NriLqh6lTP+yEGcJgaMAy3Ln9FK6wROAOzbqa5eNUsdwAin3oD0kQRDeNK6g9xpOeqku0gkVzZYn5MakxyJPdop4D7RoRPaLUJ7X9c/dn0qB/BLUri5VlgsFk0+YRrB7S30UGXf43gyY09oj9bnD+6TzAsiWip/t+MmcKIVYu9KsmTPo0M4=
   on:
