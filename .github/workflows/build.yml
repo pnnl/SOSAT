@@ -78,6 +78,7 @@ jobs:
         uses: AndreMiras/coveralls-python-action@master
         with:
           parallel: true
+          flag-name: SOSAT
   
   coveralls_finish:
     needs: lint
