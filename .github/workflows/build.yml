@@ -75,6 +75,6 @@ jobs:
         run: python -m tox -e ${{ matrix.toxenv }}
 
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: AndreMiras/coveralls-python-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
