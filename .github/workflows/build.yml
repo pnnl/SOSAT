@@ -49,7 +49,7 @@ jobs:
       with:
         parallel: true
 
-  overalls_finish:
+  coveralls_finish:
     needs: build
     runs-on: ubuntu-latest
     steps:
