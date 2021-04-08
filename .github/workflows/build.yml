@@ -1,0 +1,77 @@
+name: build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.8"
+    steps:
+    - name: Git clone
+      uses: actions/checkout@v2
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Pip cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('tox.ini', 'setup.py') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements_dev.txt
+        
+    - name: Run tests
+      run: python -m tox -e py
+  lint:
+    name: ${{ matrix.toxenv }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        toxenv:
+          - flake8
+          - coverage
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v2
+        
+      - name: Setup Python ${{ env.default_python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.default_python }}
+      - name: Pip cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.toxenv }}-${{ hashFiles('tox.ini', 'setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.toxenv }}-
+            ${{ runner.os }}-pip- 
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_dev.txt
+      - name: Lint with flake8
+        run: |
+          flake 8 --ignore=E127,F401,W503 SOSAT tests
+      - name: Run ${{ matrix.toxenv }}
+        run: python -m tox -e ${{ matrix.toxenv }}
