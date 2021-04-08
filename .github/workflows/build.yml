@@ -48,6 +48,7 @@ jobs:
       matrix:
         toxenv:
           - flake8
+          - coverage
     steps:
       - name: Git clone
         uses: actions/checkout@v2
