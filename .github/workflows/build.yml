@@ -72,6 +72,6 @@ jobs:
           pip install -r requirements_dev.txt
       - name: Lint with flake8
         run: |
-          flake 8 --ignore=E127,F401,W503 SOSAT tests
+          flake8 --ignore=E127,F401,W503 SOSAT tests
       - name: Run ${{ matrix.toxenv }}
         run: python -m tox -e ${{ matrix.toxenv }}
