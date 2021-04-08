@@ -73,3 +73,8 @@ jobs:
       
       - name: Run ${{ matrix.toxenv }}
         run: python -m tox -e ${{ matrix.toxenv }}
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
