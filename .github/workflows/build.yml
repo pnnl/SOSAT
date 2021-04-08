@@ -40,51 +40,21 @@ jobs:
         
     - name: Run tests
       run: python -m tox -e py
-  lint:
-    name: ${{ matrix.toxenv }}
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        toxenv:
-          - flake8
-          - coverage
-    steps:
-      - name: Git clone
-        uses: actions/checkout@v2
-        
-      - name: Setup Python ${{ env.default_python }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ env.default_python }}
-      - name: Pip cache
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.toxenv }}-${{ hashFiles('tox.ini', 'setup.py') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.toxenv }}-
-            ${{ runner.os }}-pip- 
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements_dev.txt
-      
-      - name: Run ${{ matrix.toxenv }}
-        run: python -m tox -e ${{ matrix.toxenv }}
 
-      - name: Coveralls
-        uses: AndreMiras/coveralls-python-action@master
-        with:
-          parallel: true
+    - name: coverage
+      run: coverage run --source SOSAT -m pytest
 
-  
-  coveralls_finish:
-    needs: lint
+    - name: Coveralls
+      uses: AndreMiras/coveralls-python-action@develop
+      with:
+        parallel: true
+
+  overalls_finish:
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: AndreMiras/coveralls-python-action@master
+      uses: AndreMiras/coveralls-python-action@develop
       with:
         parallel-finished: true
+  
