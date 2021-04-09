@@ -1,4 +1,4 @@
-from .core import np, ma, units, gravity
+from .core import np, ma, units, gravity, plt, ticker, fmt
 
 
 class StressState:
@@ -42,12 +42,12 @@ class StressState:
                  density_unit='kg/m^3',
                  pressure_unit='MPa',
                  min_stress_ratio=0.4,
-                 max_stress_ratio=2.0,
+                 max_stress_ratio=3.25,
                  nbins=200,
                  stress_unit="MPa"):
         """Constructor method
         """
-
+        self.stress_unit = stress_unit
         self.depth = depth * units(depth_unit)
         self.avg_overburden_density = \
              avg_overburden_density * units(density_unit)
@@ -58,7 +58,7 @@ class StressState:
         self.pore_pressure = self.pore_pressure.to(pressure_unit).magnitude
         self.minimum_stress = min_stress_ratio * self.vertical_stress
         self.maximum_stress = max_stress_ratio * self.vertical_stress
-
+        self._constraints = []
         # a vector containing the center of each stress bin considered
         sigvec = np.linspace(self.minimum_stress,
                              self.maximum_stress,
@@ -74,6 +74,11 @@ class StressState:
 
         self.shmin_grid = ma.MaskedArray(shmin_grid, mask=mask)
         self.shmax_grid = ma.MaskedArray(shmax_grid, mask=mask)
+        # posterior stress distribution, initialized to the
+        # uninformative prior where all compressive states are equally
+        # likely
+        psig = np.ones_like(self.shmin_grid)
+        self.psig = ma.MaskedArray(psig, mask=mask)
 
         print("vertical_stress= ", self.vertical_stress, stress_unit)
 
@@ -112,3 +117,48 @@ class StressState:
                        + (self.shmin_grid - self.vertical_stress)**2)
         arg = num / den
         return arg
+
+    def add_constraint(self, constraint):
+        """Method to add a constraint to the stress state probability
+        distribution.
+
+        :param constraint: An constrain object. Constraints will be
+            applied in the order that they are added
+        :type constraint: An object constructed from a class in
+            SOSAT.constraints
+        """
+        self._constraints.append(constraint)
+
+    def evaluate_posterior(self):
+        # initialize with the prior
+        post = self.psig
+        for c in self._constraints:
+            likelihood = c.likelihood(self)
+            post = likelihood * post
+
+        # now normalize
+        tot = ma.sum(post)
+        return post / tot
+
+    def plot_posterior(self,
+                       figwidth=5.0):
+        """Makes a contour plot of the joint probability distribution
+        of the maximum and minimum horizontal stresses
+        """
+        post = self.evaluate_posterior()
+        fig = plt.figure(figsize=(figwidth, figwidth * 0.7))
+        ax = fig.add_subplot(111)
+        im = ax.contourf(self.shmin_grid,
+                         self.shmax_grid,
+                         post,
+                         5,
+                         cmap=plt.cm.Greys)
+        plt.colorbar(im, format=ticker.FuncFormatter(fmt))
+        ax.set_xlabel("Minimum Horizontal Stress ("
+                      + self.stress_unit
+                      + ")")
+        ax.set_ylabel("Maximum Horizontal Stress ("
+                      + self.stress_unit
+                      + ")")
+        plt.tight_layout()
+        return fig

@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.ma as ma
+from scipy.stats import lognorm
 
 
 def critical_friction(sig1, sig3, pp):
@@ -31,13 +32,16 @@ class FaultConstraint:
     """
 
     def __init__(self,
-                 friction_dist,
+                 friction_dist=None,
                  min_friction=0.01,
                  max_friction=1.0):
         """Constructor method
         """
-
-        self.friction_dist = friction_dist
+        if friction_dist is None:
+            self.friction_dist = lognorm(scale=0.7,
+                                         s=0.15)
+        else:
+            self.friction_dist = friction_dist
         self.min_friction = min_friction
         self.max_friction = max_friction
 
@@ -46,13 +50,13 @@ class FaultConstraint:
         """ Computes the likelihood of each stress state
         :param ss: StressState object
         :type ss: StressState object containing the stress states
-          to be evaluated
+            to be evaluated
 
         :return: An array containing the likelihood for each stress
           state included in ``ss``
         :rtype: array of same shape as stress arrays in ``ss``, which
-           is currently a masked meshgrid array containing the bins for
-           the minimum and maximum horizontal stress
+            is currently a masked meshgrid array containing the bins for
+            the minimum and maximum horizontal stress
         """
         NFregime = np.sqrt(2.0) * 0.5
         TFregime = -np.sqrt(2.0) * 0.5
@@ -66,7 +70,7 @@ class FaultConstraint:
                                     sig3=ss.shmin_grid[NF],
                                     pp=ss.pore_pressure)
         muc[SS] = critical_friction(sig1=ss.shmax_grid[SS],
-                                    sig3=ss.shmin_grid[NF],
+                                    sig3=ss.shmin_grid[SS],
                                     pp=ss.pore_pressure)
         muc[TF] = critical_friction(sig1=ss.shmax_grid[TF],
                                     sig3=ss.vertical_stress,

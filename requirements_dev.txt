@@ -15,3 +15,4 @@ pytest-runner==5.1
 pint
 numpy==1.19.5
 scipy==1.5.4
+matplotlib
