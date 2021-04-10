@@ -5,7 +5,6 @@ import matplotlib.ticker as ticker
 import pint
 units = pint.UnitRegistry()
 Q_ = units.Quantity
-# Silence NEP 18 warning
 
 """
 The stress_state module contains classes and functions that are used to
@@ -17,6 +16,10 @@ gravity = 9.81 * units('m/s^2')
 
 
 def fmt(x, pos):
+    """
+    A utility function to improve the formatting of
+    plot labels
+    """
     a, b = '{:.2e}'.format(x).split('e')
     b = int(b)
     return r'${} \times 10^{{{}}}$'.format(a, b)
@@ -214,16 +217,6 @@ class StressState:
         slip states, and values between sqrt(2)/2 and +1 correspond
         to normal faulting states.
 
-        :return: An array containing the scalar faulting regime for
-            each stress state included in the StressState object.
-
-        :rtype: array of the same shape as the stress arrays contained
-            in the StressState class
-
-        Parameters
-        ----------
-        None
-
         Returns
         -------
         2D Numpy MaskedArray with dtype=float
@@ -310,7 +303,7 @@ class StressState:
             the number of contour levels desired in the plot
         cmap : colormap object, optional
             a matplotlib colormap object to use to display the
-            probability density. Default is plt.cm.Greys
+            probability density. Default is matplotlib.pyplot.cm.Greys
 
         Returns
         -------
