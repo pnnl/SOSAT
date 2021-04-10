@@ -3,7 +3,7 @@ Usage
 =====
 
 To use SOSAT in a project::
-
+    import matplotlib.pyplot as plt
     from SOSAT import StressState
     from SOSAT.constraints import FaultConstraint
 
