@@ -1,10 +1,10 @@
 =====
 SOSAT
 =====
-
+.. image:: https://badge.fury.io/py/SOSAT.svg
+    :target: https://badge.fury.io/py/SOSAT
 
 .. image:: https://github.com/pnnl/SOSAT/actions/workflows/build.yml/badge.svg
-
 
 .. image:: https://readthedocs.org/projects/sosat/badge/?version=latest
         :target: https://sosat.readthedocs.io/en/latest/?badge=latest
