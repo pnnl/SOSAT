@@ -4,9 +4,28 @@ from scipy.stats import lognorm
 
 
 def critical_friction(sig1, sig3, pp):
-    """A function that computes the critical friction coefficient
+    """
+    A function that computes the critical friction coefficient
     that would induce slip for the given combination of minimum
     and maximum principal stress and pore pressure
+
+    Parameters
+    ----------
+    sig1 : float or array_like
+        The maximum (most compressive) principal stress. If `sig1` is
+        array_like then `sig3` must be a scalar of type float
+    sig3 : float or array_like
+        The minimum (least compressive) principal stress.  If `sig3` is
+        array_like then `sig1` must be a scalar of type float
+    pp : float
+        The pore pressure
+
+    Returns
+    -------
+    mu_c : float or array_like
+        The critical friction coefficient. If either sig1 or sig3 are
+        array_like then the result will be an array containing the
+        critical friction coefficient for each entry in the array.
     """
 
     arg = (sig1 - sig3) / (sig1 + sig3 - 2.0 * pp)
@@ -15,26 +34,27 @@ def critical_friction(sig1, sig3, pp):
 
 
 class FaultConstraint:
-    """A class used to constrain the state of stress by the existence
+    """
+    A class used to constrain the state of stress by the existence
     of frictional fault and fractures.
 
-    :param friction_dist: a probability distribution function
-    :type friction_dist: any object that inherits from
-         scipy.stats.rv_continuous
-    :param min_friction: minimum allowable friction coefficient
-         (optional, default=0.01)
-    :type min_friction: float
-    :param max_friction: maximum allowable friction coefficient
-         (optional, default=1.0)
-    :type max_friction: float
+    Attributes
+    ----------
+    friction_dist : subclass of scipy.stats.rv_continuous
+        The probability density function for the fault friction
+        coefficient
 
-    :param
+    Parameters
+    ----------
+    friction_dist : subclass of scipy.stats.rv_continuous, optional
+        a probability distribution function from the fault friction
+        coefficient. If not provided the default is a lognormal
+        distribution with s=0.15 and scale=0.7 passed into
+        scipy.stats.lognorm
     """
 
     def __init__(self,
-                 friction_dist=None,
-                 min_friction=0.01,
-                 max_friction=1.0):
+                 friction_dist=None):
         """Constructor method
         """
         if friction_dist is None:
@@ -42,21 +62,24 @@ class FaultConstraint:
                                          s=0.15)
         else:
             self.friction_dist = friction_dist
-        self.min_friction = min_friction
-        self.max_friction = max_friction
 
     def likelihood(self,
                    ss):
-        """ Computes the likelihood of each stress state
-        :param ss: StressState object
-        :type ss: StressState object containing the stress states
-            to be evaluated
+        """
+        Computes the likelihood of each stress state
 
-        :return: An array containing the likelihood for each stress
-          state included in ``ss``
-        :rtype: array of same shape as stress arrays in ``ss``, which
-            is currently a masked meshgrid array containing the bins for
-            the minimum and maximum horizontal stress
+        Parameters
+        ----------
+        ss: `SOSAT.StressState` object
+            StressState object containing the stress states
+            over which the likelihood is to be evaluated
+
+        Returns
+        -------
+        Numpy MaskedArray
+            The returned object is a Numpy MaskedArray containing the
+            likelihood for each stress `ss`. The returned array is
+            masked identically to `ss.shmin_grid`
         """
         NFregime = np.sqrt(2.0) * 0.5
         TFregime = -np.sqrt(2.0) * 0.5
@@ -65,7 +88,8 @@ class FaultConstraint:
         NF = regime > NFregime
         TF = regime < TFregime
         SS = (~NF) & (~TF)
-        muc = ma.zeros(np.shape(ss.shmax_grid))
+        muc = ma.zeros(np.shape(ss.shmin_grid))
+        muc.mask = ss.shmin_grid
         muc[NF] = critical_friction(sig1=ss.vertical_stress,
                                     sig3=ss.shmin_grid[NF],
                                     pp=ss.pore_pressure)

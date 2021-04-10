@@ -2,14 +2,16 @@ import numpy as np
 import numpy.ma as ma
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-
 import pint
 units = pint.UnitRegistry()
 Q_ = units.Quantity
 # Silence NEP 18 warning
 
-
-"""Main module."""
+"""
+The stress_state module contains classes and functions that are used to
+represent and plot the joint probability distribution for the minimum
+and maximum horizontal stresses.
+"""
 
 gravity = 9.81 * units('m/s^2')
 
@@ -152,7 +154,8 @@ class StressState:
                  max_stress_ratio=3.25,
                  nbins=200,
                  stress_unit="MPa"):
-        """Constructor method
+        """
+        Constructor method
         """
         self.stress_unit = stress_unit
         self.depth = depth * units(depth_unit)
@@ -188,10 +191,9 @@ class StressState:
         psig = np.ones_like(self.shmin_grid)
         self.psig = ma.MaskedArray(psig, mask=mask)
 
-        print("vertical_stress= ", self.vertical_stress, stress_unit)
-
     def regime(self):
-        """Computes the scalar regime parameters for each stress state
+        """
+        Computes the scalar regime parameters for each stress state
         included in the class. The scalar regime parameter varies from
         negative one to one. It is defined the vector space where each
         each stress state is represented by a vector whose head lies
@@ -217,27 +219,68 @@ class StressState:
 
         :rtype: array of the same shape as the stress arrays contained
             in the StressState class
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        2D Numpy MaskedArray with dtype=float
+            The array is square with dimensions :attr:`nbins`
         """
         num = 1.0 / np.sqrt(2.0) * (2.0 * self.vertical_stress
                                     - self.shmin_grid
                                     - self.shmax_grid)
         den = ma.sqrt((self.shmax_grid - self.vertical_stress)**2
                        + (self.shmin_grid - self.vertical_stress)**2)
-        arg = num / den
-        return arg
+        ret = num / den
+        # ensure that the mask has been preserved
+        ret.mask = self.shmin_grid.mask
+        return ret
 
     def add_constraint(self, constraint):
-        """Method to add a constraint to the stress state probability
-        distribution.
+        """
+        Method to add a constraint to the stress state probability
+        distribution. Constraints will be applied in the order that
+        they are added
 
-        :param constraint: An constrain object. Constraints will be
-            applied in the order that they are added
-        :type constraint: An object constructed from a class in
-            SOSAT.constraints
+        Parameters
+        ----------
+        constraint : Constraint object
+            The object containing the information for the constraint,
+            must be a class in the SOSAT.constraints submodule
         """
         self._constraints.append(constraint)
 
     def evaluate_posterior(self):
+        """
+        Method to evaluate the posterior joint probability density
+        given the constraints that have been added. If no constraints
+        have been added the prior distribution will be returned.
+
+        Returns
+        -------
+        2D Numpy MaskedArray with dtype=float
+            The array is square with dimensions :attr:`nbins`, where
+            each entry in the array contains the probability density
+            for the stress state defined by :attr:`shmin_grid` and
+            :attr:`shmax_grid`
+
+        Notes
+        -----
+        The probability density will be properly normalized such that
+        the the values of all bins in the distribution will sum to one.
+        The prior distribution is homogeneous for all compressive
+        stress states considered in the distribution. The stress states
+        considered in the distribution are governed by the
+        `min_stress_ratio` and `max_stress_ratio` passed into the
+        constructor of this class.
+
+        The posterior distribution is computed by recursively applying
+        Baye's law using the likelihood function provided by each
+        constraint object that has been added to this class.
+        """
         # initialize with the prior
         post = self.psig
         for c in self._constraints:
@@ -249,9 +292,33 @@ class StressState:
         return post / tot
 
     def plot_posterior(self,
-                       figwidth=5.0):
-        """Makes a contour plot of the joint probability distribution
+                       figwidth=5.0,
+                       figheight=5.0,
+                       contour_levels=5,
+                       cmap=plt.cm.Greys):
+        """
+        Makes a contour plot of the joint probability distribution
         of the maximum and minimum horizontal stresses
+
+        Parameters
+        ----------
+        figwidth : float, optional
+            the width of the figure in inches, defaults to 5 inches
+        figheight : float, optional
+            the height of the figure in inches, defaults to 5 inches
+        contour_levels : int, optional
+            the number of contour levels desired in the plot
+        cmap : colormap object, optional
+            a matplotlib colormap object to use to display the
+            probability density. Default is plt.cm.Greys
+
+        Returns
+        -------
+        matplotlib.pyplot.Figure object
+
+        Notes
+        -----
+        The plot is generated with `matplotlib.pyplot.contourf`
         """
         post = self.evaluate_posterior()
         fig = plt.figure(figsize=(figwidth, figwidth * 0.7))
@@ -259,7 +326,7 @@ class StressState:
         im = ax.contourf(self.shmin_grid,
                          self.shmax_grid,
                          post,
-                         5,
+                         contour_levels,
                          cmap=plt.cm.Greys)
         plt.colorbar(im, format=ticker.FuncFormatter(fmt))
         ax.set_xlabel("Minimum Horizontal Stress ("
