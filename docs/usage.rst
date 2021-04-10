@@ -3,6 +3,7 @@ Usage
 =====
 
 To use SOSAT in a project::
+
     import matplotlib.pyplot as plt
     from SOSAT import StressState
     from SOSAT.constraints import FaultConstraint
@@ -17,13 +18,9 @@ To use SOSAT in a project::
     pore_pressure = pore_pressure_grad * (1.0 / 1000) * depth
 
     ss = StressState(depth=depth,
-                    avg_overburden_density=avg_overburden_density,
-                    pore_pressure=pore_pressure)
-    # friction_mu = 0.7
-    # friction_std = 0.15
-    # mudist = lognorm(scale=friction_mu,
-    #                 s=friction_std)
-    # fc = FaultConstraint(mudist)
+                     avg_overburden_density=avg_overburden_density,
+                     pore_pressure=pore_pressure)
+
     fc = FaultConstraint()
 
     ss.add_constraint(fc)
