@@ -1,37 +1,144 @@
-from .core import np, ma, units, gravity, plt, ticker, fmt
+import numpy as np
+import numpy.ma as ma
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
+import pint
+units = pint.UnitRegistry()
+Q_ = units.Quantity
+# Silence NEP 18 warning
+
+
+"""Main module."""
+
+gravity = 9.81 * units('m/s^2')
+
+
+def fmt(x, pos):
+    a, b = '{:.2e}'.format(x).split('e')
+    b = int(b)
+    return r'${} \times 10^{{{}}}$'.format(a, b)
 
 
 class StressState:
-    """A class to contain all data necessary to define the probability
+    """
+    A class to contain all data necessary to define the probability
     distribution for all possible stress states at a given point in the
     subsurface.
 
-    :param depth: the true vertical depth of the point being analyzed
-    :type  depth: float
-    :param average_overburden_density: average mass density of all overlying
-        formations
-    :type average_overburden_density: float
-    :param pore_pressure: formation pore pressure
-    :type pore_pressure: float
-    :param depth_unit: unit of measurement for depth
-    :type depth_unit: str, optional, see list of units in pint package
-        documentation
-    :param density_unit: unit of measurement for mass density
-    :type density_unit: str, optional, see list of units in pint package
-        documentation
-    :param pressure_unit: unit of measurement for pressure
-    :type pressure_unit: str, optional, see list of units in pint package
-        documentation
-    :param min_stress_ratio: minimum stress included in the analysis expressed
-        as a fraction of the vertical stress. Default value is 0.4
-    :type min_stress_ratio: float
-    :param max_stress_ratio: maximum stress included in the analysis expressed
-        as a fraction of the vertical stress. Default value is 2.0
-    :type max_stress_ratio: float
-    :param nbins: number of bins to use for the horizontal principal
-        stresses. The same number is used for both horizontal
-        principal stresses. Optional with a default value of 200
-    :type nbins: integer
+    Attributes
+    ----------
+    depth : float
+        The true vertical depth of the point being analyzed
+    vertical_stress : float
+        The total vertical stress, currently taken as deterministic
+    pore_pressure : float
+        The pore pressure, currently taken as deterministic
+    shmin_grid : numpy MaskedArray object
+        A 2D array containing the value of the minimum horizontal
+        stress for each stress state considered. Values that are not
+        admissible, such as where the minimum horizontal stress would
+        be greater than the maximum horizontal stress are masked
+    shmax_grid : numpy MaskedArray object
+        A 2D array containing the value of the mmaximum horizontal
+        stress for each stress state considered. Values that are not
+        admissible, such as where the minimum horizontal stress would
+        be greater than the maximum horizontal stress are masked
+    stress_unit : str
+        The unit used for stress
+    dpeth_unit : str
+        The unit used for vertical depth
+
+    Parameters
+    ----------
+    depth : float
+        the true vertical depth of the point being analyzed
+    average_overburden_density : float
+         average mass density of all overlying formations
+    pore_pressure : float
+        formation pore pressure
+    depth_unit : str, optionsl
+        unit of measurement for depth, see list of units in pint
+        package documentation
+    density_unit : str, optional
+        unit of measurement for mass density, see list of units in
+        pintpackage documentation
+    pressure_unit : str, optional
+        unit of measurement for pressure, see list of units in pint
+        package documentation
+    min_stress_ratio : float, optional
+        Minimum stress included in the analysis expressed as a fraction
+        of the vertical stress. This is not intended as a way to express
+        a prior probability but is instead meant as a convenient way to
+        set the bounds of stress considered in the analysis. It does
+        effectively truncate the stress distribution at this value and
+        so should be chose well outside of the zone of significant
+        probability density. Default value is 0.4
+    max_stress_ratio : float
+        Maximum stress included in the analysis expressed as a fraction
+        of the vertical stress. This is not intended as a way to express
+        a prior probability but is instead meant as a convenient way to
+        set the bounds of stress considered in the analysis. It does
+        effectively truncate the stress distribution at this value and
+        so should be chose well outside of the zone of significant
+        probability density. Default value is 3.25
+    nbins : int
+        number of bins to use for the horizontal principal stresses.
+        The same number is used for both horizontal principal stresses.
+        Default value is 200.
+
+    Notes
+    -----
+    This class applies the Bayesian approach to quantifying uncertainty
+    in the state of stress at a single point in the subsurface that is
+    outlined in [1]_. By "single point" here we mean any volume of the
+    subsurface that the user wishes to treat as having a homogeneous
+    stress state the. Depending on the application this could be a
+    volume with length scale of a log scale (tens of centimeters) or
+    in a regional-scale analysis could be a volume with length scale of
+    kilometers.
+
+    Currently the vertical stress and pore pressure are taken as
+    deterministically known, so that uncertainties in these values
+    are not reflected in the uncertainty in the the horizontal
+    principal stresses. This may change in a future release, but in
+    many applications is not a big limitation because there is
+    generally a smaller uncertainty in the vertical stress and pore
+    pressure compared to the horizontal principal stresses.
+
+    Currently this class does not contain stress orientation
+    information, though this too is planned to change in a future
+    release. Though this would only add significant value when methods
+    to add different StressState objects are needed and implemented.
+    This will be required, for example, to interpolate between
+    different points where a StressState object has been parameterized.
+
+    References
+    ----------
+    [1] Burghardt, J. "Geomechanical Risk Assessment for Subsurface
+    Fluid Disposal Operations," Rock Mech Rock Eng 51, 2265–2288 (2018)
+    https://doi.org/10.1007/s00603-018-1409-1
+
+    Examples
+    --------
+    To compute and plot the posterior distribution at a point
+    with a frictional faulting constraint, you would do the following:
+
+    >>> from SOSAT import StressState
+    >>> from SOSAT.constraints import FaultConstraint
+    >>> ss = StressState(1.0,
+                         2.5,
+                         0.3,
+                         depth_unit='km',
+                         density_unit='g/cm^3',
+                         pressure_unit='MPa')
+
+    >>> sigv = ss.vertical_stress
+    >>> fc = FaultConstraint()
+    >>> ss.add_constraint(fc)
+    >>> fig = ss.plot_posterior()
+    >>> plt.savefig("fault_constraint_posterior.png")
+
     """
 
     def __init__(self,
@@ -49,19 +156,20 @@ class StressState:
         """
         self.stress_unit = stress_unit
         self.depth = depth * units(depth_unit)
-        self.avg_overburden_density = \
+        self.depth_unit = depth_unit
+        self._avg_overburden_density = \
              avg_overburden_density * units(density_unit)
         self.vertical_stress = (self.depth
-                                * self.avg_overburden_density
+                                * self._avg_overburden_density
                                 * gravity).to(stress_unit).magnitude
         self.pore_pressure = pore_pressure * units(pressure_unit)
         self.pore_pressure = self.pore_pressure.to(pressure_unit).magnitude
-        self.minimum_stress = min_stress_ratio * self.vertical_stress
-        self.maximum_stress = max_stress_ratio * self.vertical_stress
+        self._minimum_stress = min_stress_ratio * self.vertical_stress
+        self._maximum_stress = max_stress_ratio * self.vertical_stress
         self._constraints = []
         # a vector containing the center of each stress bin considered
-        sigvec = np.linspace(self.minimum_stress,
-                             self.maximum_stress,
+        sigvec = np.linspace(self._minimum_stress,
+                             self._maximum_stress,
                              nbins)
 
         # create a meshgrid object holding each possible stress state
