@@ -51,7 +51,7 @@ class StressState:
         be greater than the maximum horizontal stress are masked
     stress_unit : str
         The unit used for stress
-    dpeth_unit : str
+    depth_unit : str
         The unit used for vertical depth
 
     Parameters
