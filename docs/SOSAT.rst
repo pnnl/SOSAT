@@ -19,13 +19,6 @@ SOSAT.stress_state module
    :undoc-members:
    :show-inheritance:
 
-SOSAT.core
-----------
-
-.. automodule:: SOSAT.core
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 SOSAT.constraints
 -----------------
@@ -39,6 +32,14 @@ SOSAT.constraints.fault_constraint
 ----------------------------------
 
 .. automodule:: SOSAT.constraints.fault_constraint
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+SOSAT.constraints.faulting_regime_constraint
+----------------------------------
+
+.. automodule:: SOSAT.constraints.faulting_regime_constraint
    :members:
    :undoc-members:
    :show-inheritance:
