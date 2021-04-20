@@ -2,6 +2,8 @@ import numpy as np
 import numpy.ma as ma
 from scipy.stats import lognorm
 
+from .constraint_base import StressConstraint
+
 
 def critical_friction(sig1, sig3, pp):
     """
@@ -33,7 +35,7 @@ def critical_friction(sig1, sig3, pp):
     return ma.tan(phic)
 
 
-class FaultConstraint:
+class FaultConstraint(StressConstraint):
     """
     A class used to constrain the state of stress by the existence
     of frictional fault and fractures.
@@ -55,7 +57,8 @@ class FaultConstraint:
 
     def __init__(self,
                  friction_dist=None):
-        """Constructor method
+        """
+        Constructor method
         """
         if friction_dist is None:
             self.friction_dist = lognorm(scale=0.7,
