@@ -15,3 +15,4 @@ __version__ = '0.1.0'
 from .stress_state import StressState
 from .constraints import FaultConstraint
 from .constraints import FaultingRegimeConstraint, SU
+from .constraints import BreakoutConstraint
