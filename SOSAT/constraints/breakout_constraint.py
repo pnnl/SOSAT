@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import ma
-from scipy.stats import lognorm, uniform
 import pint
 
 from .constraint_base import StressConstraint
@@ -53,6 +52,7 @@ class BreakoutConstraint(StressConstraint):
 
     Attributes
     ----------
+    No public attributes
 
     Parameters
     ----------
@@ -150,18 +150,17 @@ class BreakoutConstraint(StressConstraint):
         Constructor method
         """
 
-        self.breakout_exists = breakout_exists
-        self.UCS_dist = UCS_dist
-        self.rock_friction_angle_dist = rock_friction_angle_dist
-        self.rock_friction_angle_units = rock_friction_angle_units
-        self.mud_pressure_dist = mud_pressure_dist
-        self.mud_temperature_dist = mud_temperature_dist
-        self.formation_temperature = formation_temperature
-        self.YM = YM * units(pressure_unit)
-        self.PR = PR
-        self.CTE = CTE
-        self.pressure_unit = pressure_unit
-        self.temperature_unit = temperature_unit
+        self._breakout_exists = breakout_exists
+        self._UCS_dist = UCS_dist
+        self._rock_friction_angle_dist = rock_friction_angle_dist
+        self._rock_friction_angle_units = rock_friction_angle_units
+        self._mud_pressure_dist = mud_pressure_dist
+        self._mud_temperature_dist = mud_temperature_dist
+        self._formation_temperature = formation_temperature
+        self._YM = YM * units(pressure_unit)
+        self._PR = PR
+        self._CTE = CTE
+        self._pressure_unit = pressure_unit
 
     def likelihood(self, ss):
         """
@@ -189,8 +188,8 @@ class BreakoutConstraint(StressConstraint):
         sig1_nominal = 3.0 * ss.shmax_grid - ss.shmin_grid \
                        - 2.0 * ss.pore_pressure
         # compute the thermoelastic factor, which will have
-        # units of self.pressure_unit/(delta self.temperature unit)
-        TEF = (self.CTE * self.YM / (1.0 - self.PR))
+        # units of self._pressure_unit/(delta self.temperature unit)
+        TEF = (self._CTE * self._YM / (1.0 - self._PR))
 
         # since all temperature-based quantities in the class are
         # assumed to be consistent, we do not include pint temperature
@@ -220,21 +219,21 @@ class BreakoutConstraint(StressConstraint):
             # has changes meaningfully
             for i in range(0, 500):
                 # draw random samples
-                mud_pressure_i = self.mud_pressure_dist.rvs() \
-                    * units(self.pressure_unit)
+                mud_pressure_i = self._mud_pressure_dist.rvs() \
+                    * units(self._pressure_unit)
                 # convert to the stress unit of ss
                 mud_pressure_i = mud_pressure_i \
                                  .to(ss.stress_unit).magnitude
                 # no unit conversion is needed since all members of
                 # this class should have consistent temperature units
-                mud_temperature_i = self.mud_temperature_dist.rvs()
+                mud_temperature_i = self._mud_temperature_dist.rvs()
 
-                UCS_i = self.UCS_dist.rvs() * units(self.pressure_unit)
+                UCS_i = self._UCS_dist.rvs() * units(self._pressure_unit)
                 # convert to the stress unit of ss
                 UCS_i = UCS_i.to(ss.stress_unit).magnitude
                 # friction parameter in the specified units
-                rock_friction_i = self.rock_friction_angle_dist.rvs() \
-                                  * units(self.rock_friction_angle_units)
+                rock_friction_i = self._rock_friction_angle_dist.rvs() \
+                                  * units(self._rock_friction_angle_units)
                 # convert to radians to be used in the numpy functions
                 rock_friction_i = rock_friction_i.to('radians').magnitude
 
@@ -248,8 +247,10 @@ class BreakoutConstraint(StressConstraint):
 
                 sig3 = deltaP
 
-                # this will have units of delta self.temperature_unit
-                deltaT = mud_temperature_i - self.formation_temperature
+                # this will have units of delta temperature which is
+                # assumed to be consistent between the user-supplied
+                # mud temperature and formation temperature
+                deltaT = mud_temperature_i - self._formation_temperature
 
                 # compute the mud pressure effect on the nominal maximum
                 # hoop stress
@@ -281,7 +282,7 @@ class BreakoutConstraint(StressConstraint):
                           " iterations")
         # return the most updated estimate for the likelihood of
         # breakout formation at each stress state
-        if self.breakout_exists:
+        if self._breakout_exists:
             return PBO_new
         else:
             return 1.0 - PBO_new

@@ -1,4 +1,4 @@
-"""Console script for SOSAT."""
+"""Console script for SOSAT. Not yet implemented"""
 import sys
 import click
 

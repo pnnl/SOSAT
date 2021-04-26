@@ -52,6 +52,14 @@ SOSAT.constraints.breakout_constraint
    :undoc-members:
    :show-inheritance:
 
+SOSAT.constraints.stress_measurement_constraint
+----------------------------------
+
+.. automodule:: SOSAT.constraints.stress_measurement_constraint
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 SOSAT.cli module
 ----------------
 

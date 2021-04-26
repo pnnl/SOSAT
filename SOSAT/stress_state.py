@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import pint
 units = pint.UnitRegistry()
-Q_ = units.Quantity
 
 """
 The stress_state module contains classes and functions that are used to

@@ -7,6 +7,7 @@ from SOSAT import StressState
 from SOSAT.constraints import BreakoutConstraint
 from SOSAT.constraints import FaultConstraint
 from SOSAT.constraints import FaultingRegimeConstraint, SU
+from SOSAT.constraints import StressMeasurement
 
 # depth in meters
 depth = 1228.3
@@ -59,10 +60,13 @@ frc = FaultingRegimeConstraint(SU(w_NF=0.1, w_SS=15.0, w_TF=3.0,
                                   theta1=np.sqrt(2.0) * 0.5, k1=300.0,
                                   theta2=-np.sqrt(2.0) * 0.5, k2=100.0))
 
+smc = StressMeasurement(shmin_dist=uniform(loc=25.0,
+                                           scale=5.0))
 
 fc = FaultConstraint()
 ss.add_constraint(fc)
 ss.add_constraint(frc)
 ss.add_constraint(bc)
+ss.add_constraint(smc)
 fig = ss.plot_posterior()
-plt.savefig("faulting_and_breakout_constraint_posterior.png")
+plt.savefig("faulting_breakout_measurement_constraint_posterior.png")
