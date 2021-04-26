@@ -44,6 +44,14 @@ SOSAT.constraints.faulting_regime_constraint
    :undoc-members:
    :show-inheritance:
 
+SOSAT.constraints.breakout_constraint
+----------------------------------
+
+.. automodule:: SOSAT.constraints.breakout_constraint
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 SOSAT.cli module
 ----------------
 
