@@ -37,7 +37,7 @@ SOSAT.constraints.fault_constraint
    :show-inheritance:
 
 SOSAT.constraints.faulting_regime_constraint
-----------------------------------
+--------------------------------------------
 
 .. automodule:: SOSAT.constraints.faulting_regime_constraint
    :members:
@@ -45,7 +45,7 @@ SOSAT.constraints.faulting_regime_constraint
    :show-inheritance:
 
 SOSAT.constraints.breakout_constraint
-----------------------------------
+-------------------------------------
 
 .. automodule:: SOSAT.constraints.breakout_constraint
    :members:
@@ -53,7 +53,7 @@ SOSAT.constraints.breakout_constraint
    :show-inheritance:
 
 SOSAT.constraints.stress_measurement_constraint
-----------------------------------
+-----------------------------------------------
 
 .. automodule:: SOSAT.constraints.stress_measurement_constraint
    :members:

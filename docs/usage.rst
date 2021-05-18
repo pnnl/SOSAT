@@ -6,6 +6,7 @@ Below is a complete example of how to use SOSAT in in script to evaluate the
 state of stress using all available stress constraints.
 
 .. code-block:: python
+
     import numpy as np
     from scipy.stats import uniform
     import matplotlib.pyplot as plt
