@@ -45,8 +45,10 @@ plt.savefig("faulting_stress_measurement_constraint_posterior.png")
 
 # generate samples
 sampler = RejectionSampler(ss)
-Nsamples = int(1e8)
+Nsamples = int(1e6)
 shmin, shmax, sv = sampler.GenerateSamples(Nsamples)
+
+assert len(shmin) == Nsamples
 figwidth = 4.0
 fig2 = plt.figure(figsize=(figwidth, figwidth * 0.7))
 

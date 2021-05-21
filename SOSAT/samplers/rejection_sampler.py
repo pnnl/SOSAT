@@ -93,7 +93,7 @@ class RejectionSampler:
 
             shmin_samples = np.concatenate((shmin_samples, shmin_t[accept]))
             shmax_samples = np.concatenate((shmax_samples, shmax_t[accept]))
-            Naccepted += len(accept)
+            Naccepted = len(shmin_samples)
 
         shmin_samples = shmin_samples[0:Nsamples]
         shmax_samples = shmax_samples[0:Nsamples]

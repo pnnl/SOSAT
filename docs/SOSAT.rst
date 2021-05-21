@@ -60,6 +60,14 @@ SOSAT.constraints.stress_measurement_constraint
    :undoc-members:
    :show-inheritance:
 
+SOSAT.samplers.rejection_sampler
+--------------------------------
+
+.. automodule:: SOSAT.samplers.rejection_sampler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 SOSAT.cli module
 ----------------
 
