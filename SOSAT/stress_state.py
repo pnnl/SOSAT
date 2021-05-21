@@ -313,6 +313,7 @@ class StressState:
         The plot is generated with `matplotlib.pyplot.contourf`
         """
         post = self.evaluate_posterior()
+
         fig = plt.figure(figsize=(figwidth, figwidth * 0.7))
         ax = fig.add_subplot(111)
         im = ax.contourf(self.shmin_grid,
