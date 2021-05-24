@@ -330,3 +330,29 @@ class StressState:
                       + ")")
         plt.tight_layout()
         return fig
+
+    def get_shmin_marginal(self):
+        """
+        get samples of the marginal probability distribution for the
+        minimum principal stress
+        """
+        post = self.evaluate_posterior()
+        pshmin = np.sum(post, axis=1)
+        sigvec = np.linspace(self._minimum_stress,
+                             self._maximum_stress,
+                             np.shape(self.shmin_grid)[0])
+
+        return sigvec, pshmin
+
+    def get_shmax_marginal(self):
+        """
+        get samples of the marginal probability distribution for the
+        maximum principal stress
+        """
+        post = self.evaluate_posterior()
+        pshmax = np.sum(post, axis=0)
+        sigvec = np.linspace(self._minimum_stress,
+                             self._maximum_stress,
+                             np.shape(self.shmin_grid)[0])
+
+        return sigvec, pshmax
