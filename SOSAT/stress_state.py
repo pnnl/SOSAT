@@ -333,7 +333,7 @@ class StressState:
 
     def get_shmin_marginal(self):
         """
-        get samples of the marginal probability distribution for the
+        get the marginal probability distribution for the
         minimum principal stress
         """
         post = self.evaluate_posterior()
@@ -346,7 +346,7 @@ class StressState:
 
     def get_shmax_marginal(self):
         """
-        get samples of the marginal probability distribution for the
+        get the marginal probability distribution for the
         maximum principal stress
         """
         post = self.evaluate_posterior()
@@ -356,3 +356,47 @@ class StressState:
                              np.shape(self.shmin_grid)[0])
 
         return sigvec, pshmax
+
+    def get_shmin_marginal_cdf(self):
+        """
+        get the marginal cumulative probability function for the
+        minimum horizontal stress
+        """
+        sigvec, pshmin = self.get_shmin_marginal()
+        shmin_cdf = np.cumsum(pshmin)
+        return sigvec, shmin_cdf
+
+    def get_shmax_marginal_cdf(self):
+        """
+        get the marginal cumulative probability function for the
+        maximum horizontal stress
+        """
+        sigvec, pshmax = self.get_shmax_marginal()
+        shmax_cdf = np.cumsum(pshmax)
+        return sigvec, shmax_cdf
+
+    def get_shmin_confidence_intervals(self, confidence):
+        """
+        return an upper and lower bound within a specified confidence
+        interval. Confidence interval should be specified as a fraction
+        so that, for example, a 95% confidence interval is expressed
+        as confidence=0.95
+        """
+
+        sigvec, shmin_cdf = self.get_shmin_marginal_cdf()
+        i_low = np.argmax(shmin_cdf > (1.0 - confidence))
+        i_high = np.argmax(shmin_cdf > confidence)
+        return sigvec[i_low], sigvec[i_high]
+
+    def get_shmax_confidence_intervals(self, confidence):
+        """
+        return an upper and lower bound within a specified confidence
+        interval. Confidence interval should be specified as a fraction
+        so that, for example, a 95% confidence interval is expressed
+        as confidence=0.95
+        """
+
+        sigvec, shmax_cdf = self.get_shmax_marginal_cdf()
+        i_low = np.argmax(shmax_cdf > (1.0 - confidence))
+        i_high = np.argmax(shmax_cdf > confidence)
+        return sigvec[i_low], sigvec[i_high]

@@ -52,3 +52,27 @@ plt.savefig("fault_constraint_shmax_marginal_posterior.png")
 psum = np.sum(pshmax)
 
 assert psum == pytest.approx(1.0)
+
+fig3 = plt.figure()
+ax3 = fig3.add_subplot(111)
+shmin, shmin_cdf = ss.get_shmin_marginal_cdf()
+ax3.plot(shmin, shmin_cdf, "k")
+ax3.set_xlabel("Minimum Horizontal Stress")
+ax3.set_ylabel("Cumulative Probability Density")
+fig3.savefig("fault_constraint_shmin_cdf.png")
+
+shmin_ll, shmin_ul = ss.get_shmin_confidence_intervals(0.95)
+print("shmin_ll= ", shmin_ll)
+print("shmin_ul= ", shmin_ul)
+
+fig4 = plt.figure()
+ax4 = fig4.add_subplot(111)
+shmin, shmin_cdf = ss.get_shmax_marginal_cdf()
+ax4.plot(shmin, shmin_cdf, "k")
+ax4.set_xlabel("Maximum Horizontal Stress")
+ax4.set_ylabel("Cumulative Probability Density")
+fig4.savefig("fault_constraint_shmax_cdf.png")
+
+shmax_ll, shmax_ul = ss.get_shmax_confidence_intervals(0.95)
+print("shmax_ll= ", shmax_ll)
+print("shmax_ul= ", shmax_ul)
