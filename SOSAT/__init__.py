@@ -16,6 +16,7 @@ from .stress_state import StressState
 from .constraints import FaultConstraint
 from .constraints import FaultingRegimeConstraint, SU
 from .constraints import BreakoutConstraint
+from .constraints import DITFConstraint
 from .constraints import StressMeasurement
 from .samplers import RejectionSampler
 from .risk_analysis import CriticalFaultActivation

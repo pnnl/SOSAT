@@ -52,6 +52,14 @@ SOSAT.constraints.breakout_constraint
    :undoc-members:
    :show-inheritance:
 
+SOSAT.constraints.DITF_constraint
+-------------------------------------
+
+.. automodule:: SOSAT.constraints.DITF_constraint
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 SOSAT.constraints.stress_measurement_constraint
 -----------------------------------------------
 

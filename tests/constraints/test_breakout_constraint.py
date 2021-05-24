@@ -50,8 +50,7 @@ bc = BreakoutConstraint(breakout_exists=False,
                         YM=YM,
                         PR=PR,
                         CTE=CTE,
-                        pressure_unit='MPa',
-                        temperature_unit='degC')
+                        pressure_unit='MPa')
 ss.add_constraint(bc)
 fig = ss.plot_posterior()
 plt.savefig("breakout_constraint_posterior.png")

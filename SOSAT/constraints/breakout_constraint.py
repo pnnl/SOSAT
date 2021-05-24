@@ -109,10 +109,7 @@ class BreakoutConstraint(StressConstraint):
     pressure_unit : str, optional
         The unit used for UCS and Young's modulus; should be a unit
         recognized by `pint.UnitRegistry`; defaults to 'Pa'
-    temperature_unit :str, optional
-        The unit used to specify the mud temperature distribution and
-        the formation temperature; should be a unit recognized by
-        `pint.UnitRegistry`; defaults to degrees C ('degC')
+
     Notes
     -----
     This class uses a Mohr Coulomb (MC) failure criterion to evaluate
@@ -144,8 +141,7 @@ class BreakoutConstraint(StressConstraint):
                  YM,
                  PR,
                  CTE,
-                 pressure_unit='Pa',
-                 temperature_unit='degC'):
+                 pressure_unit='Pa'):
         """
         Constructor method
         """

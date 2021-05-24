@@ -53,8 +53,7 @@ bc = BreakoutConstraint(breakout_exists=False,
                         YM=YM,
                         PR=PR,
                         CTE=CTE,
-                        pressure_unit='MPa',
-                        temperature_unit='degC')
+                        pressure_unit='MPa')
 
 frc = FaultingRegimeConstraint(SU(w_NF=0.1, w_SS=15.0, w_TF=3.0,
                                   theta1=np.sqrt(2.0) * 0.5, k1=300.0,
