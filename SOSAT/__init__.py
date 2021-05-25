@@ -12,7 +12,7 @@ __author__ = """Jeff Burghardt"""
 __email__ = 'jeffrey.burghardt@pnnl.gov'
 __version__ = '0.2.5'
 
-from .stress_state import StressState
+from .stress_state import StressState, units
 from .constraints import FaultConstraint
 from .constraints import FaultingRegimeConstraint, SU
 from .constraints import BreakoutConstraint
