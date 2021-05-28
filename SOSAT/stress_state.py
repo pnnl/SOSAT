@@ -318,7 +318,7 @@ class StressState:
         -----
         The plot is generated with `matplotlib.pyplot.contourf`
         """
-        if ~self._posterior_evaluated:
+        if not self._posterior_evaluated:
             self.evaluate_posterior()
 
         fig = plt.figure(figsize=(figwidth, figwidth * 0.7))
@@ -343,7 +343,7 @@ class StressState:
         get the marginal probability distribution for the
         minimum principal stress
         """
-        if ~self._posterior_evaluated:
+        if not self._posterior_evaluated:
             self.evaluate_posterior()
 
         pshmin = np.sum(self.posterior, axis=1)
@@ -358,7 +358,7 @@ class StressState:
         get the marginal probability distribution for the
         maximum principal stress
         """
-        if ~self._posterior_evaluated:
+        if not self._posterior_evaluated:
             self.evaluate_posterior()
         pshmax = np.sum(self.posterior, axis=0)
         sigvec = np.linspace(self._minimum_stress,
