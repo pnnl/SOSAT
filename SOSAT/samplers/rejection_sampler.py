@@ -52,11 +52,11 @@ class RejectionSampler:
         """
 
         # evaluate the poserior on the grid
-        psig = self.SS.evaluate_posterior()
-        pmax = np.max(psig)
+        self.SS.evaluate_posterior()
+        pmax = np.max(self.SS.posterior)
 
         # scale to 0-1
-        psig = psig / pmax
+        psig = self.SS.posterior / pmax
 
         # find the size of the stress grid
         ngrid = np.shape(psig)[0]

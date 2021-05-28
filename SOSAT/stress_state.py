@@ -159,6 +159,7 @@ class StressState:
         """
         Constructor method
         """
+        self._posterior_evaluated = False
         self.stress_unit = stress_unit
         self.depth = depth * units(depth_unit)
         self.depth_unit = depth_unit
@@ -170,6 +171,8 @@ class StressState:
         self.pore_pressure = pore_pressure * units(pressure_unit)
         self.pore_pressure = self.pore_pressure.to(pressure_unit).magnitude
         self._minimum_stress = min_stress_ratio * self.vertical_stress
+        if self._minimum_stress < self.pore_pressure:
+            self._minimum_stress = self.pore_pressure
         self._maximum_stress = max_stress_ratio * self.vertical_stress
         self._constraints = []
         # a vector containing the center of each stress bin considered
@@ -244,6 +247,7 @@ class StressState:
             must be a class in the SOSAT.constraints submodule
         """
         self._constraints.append(constraint)
+        self._posterior_evaluated = False
 
     def evaluate_posterior(self):
         """
@@ -273,15 +277,17 @@ class StressState:
         Baye's law using the likelihood function provided by each
         constraint object that has been added to this class.
         """
-        # initialize with the prior
-        post = self.psig
+        # initialize with the prior and use log likelihoods to update
+        log_posterior = np.log(self.psig)
         for c in self._constraints:
-            likelihood = c.likelihood(self)
-            post = likelihood * post
+            loglikelihood = c.loglikelihood(self)
+            log_posterior = log_posterior + loglikelihood
 
+        self.posterior = np.exp(log_posterior)
         # now normalize
-        tot = ma.sum(post)
-        return post / tot
+        tot = ma.sum(self.posterior)
+        self.posterior = self.posterior / tot
+        self._posterior_evaluated = True
 
     def plot_posterior(self,
                        figwidth=5.0,
@@ -312,13 +318,14 @@ class StressState:
         -----
         The plot is generated with `matplotlib.pyplot.contourf`
         """
-        post = self.evaluate_posterior()
+        if ~self._posterior_evaluated:
+            self.evaluate_posterior()
 
         fig = plt.figure(figsize=(figwidth, figwidth * 0.7))
         ax = fig.add_subplot(111)
         im = ax.contourf(self.shmin_grid,
                          self.shmax_grid,
-                         post,
+                         self.posterior,
                          contour_levels,
                          cmap=plt.cm.Greys)
         plt.colorbar(im, format=ticker.FuncFormatter(fmt))
@@ -336,8 +343,10 @@ class StressState:
         get the marginal probability distribution for the
         minimum principal stress
         """
-        post = self.evaluate_posterior()
-        pshmin = np.sum(post, axis=1)
+        if ~self._posterior_evaluated:
+            self.evaluate_posterior()
+
+        pshmin = np.sum(self.posterior, axis=1)
         sigvec = np.linspace(self._minimum_stress,
                              self._maximum_stress,
                              np.shape(self.shmin_grid)[0])
@@ -349,8 +358,9 @@ class StressState:
         get the marginal probability distribution for the
         maximum principal stress
         """
-        post = self.evaluate_posterior()
-        pshmax = np.sum(post, axis=0)
+        if ~self._posterior_evaluated:
+            self.evaluate_posterior()
+        pshmax = np.sum(self.posterior, axis=0)
         sigvec = np.linspace(self._minimum_stress,
                              self._maximum_stress,
                              np.shape(self.shmin_grid)[0])

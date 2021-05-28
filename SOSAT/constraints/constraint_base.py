@@ -8,12 +8,13 @@ class StressConstraint(ABC):
 
     """
     @abstractmethod
-    def likelihood(self,
-                   ss):
+    def loglikelihood(self,
+                      ss):
         """
         Abstract method that requires all derived classes to implement
-        a funcction that computes the likelihood of the constraint for
-        a the stress states passed in through the StressState parameter
+        a funcction that computes the loglikelihood of the constraint
+        for a the stress states passed in through the StressState
+        parameter
 
         Parameters
         ----------
@@ -25,7 +26,7 @@ class StressConstraint(ABC):
         -------
         Numpy MaskedArray
             The returned object is a Numpy MaskedArray containing the
-            likelihood for each stress `ss`. The returned array is
+            log likelihood for each stress `ss`. The returned array is
             masked identically to `ss.shmin_grid`
         """
         pass

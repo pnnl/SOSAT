@@ -158,11 +158,11 @@ class BreakoutConstraint(StressConstraint):
         self._CTE = CTE
         self._pressure_unit = pressure_unit
 
-    def likelihood(self, ss):
+    def loglikelihood(self, ss):
         """
-        Computes the likelihood of each stress state given the presence
-        or absence of breakouts, formation properties, and mud properties
-        specified
+        Computes the loglikelihood of each stress state given the
+        presence or absence of breakouts, formation properties, and mud
+        properties specified
 
         Parameters
         ----------
@@ -279,6 +279,10 @@ class BreakoutConstraint(StressConstraint):
         # return the most updated estimate for the likelihood of
         # breakout formation at each stress state
         if self._breakout_exists:
-            return PBO_new
+            with np.errstate(divide='ignore'):
+                loglikelihood = np.log(PBO_new)
+            return loglikelihood
         else:
-            return 1.0 - PBO_new
+            with np.errstate(divide='ignore'):
+                loglikelihood = np.log1p(- PBO_new)
+            return loglikelihood

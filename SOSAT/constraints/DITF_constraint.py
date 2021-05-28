@@ -1,3 +1,4 @@
+from logging import log
 import numpy as np
 from numpy import ma
 import pint
@@ -107,7 +108,7 @@ class DITFConstraint(StressConstraint):
         self._CTE = CTE
         self._pressure_unit = pressure_unit
 
-    def likelihood(self, ss):
+    def loglikelihood(self, ss):
         """
         Computes the likelihood of each stress state given the presence
         or absence of DITFs, formation and mud properties specified.
@@ -186,9 +187,13 @@ class DITFConstraint(StressConstraint):
         # return the most updated estimate for the likelihood of
         # DITF formation at each stress state
         if self._DITF_exists:
-            return PDITF_new
+            with np.errstate(divide='ignore'):
+                loglikelihood = np.log(PDITF_new)
+            return loglikelihood
         else:
             # we should change this to do the calculation using
             # log probabilities and np.log1p to improve numerical
             # precision when PDITF_new is close to 1.0
-            return 1.0 - PDITF_new
+            with np.errstate(divide='ignore'):
+                loglikelihood = np.log1p(- PDITF_new)
+            return loglikelihood

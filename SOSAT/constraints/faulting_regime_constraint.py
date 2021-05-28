@@ -153,7 +153,9 @@ class FaultingRegimeConstraint(StressConstraint):
         """
         self._regime_dist = regime_dist
 
-    def likelihood(self,
-                   ss):
+    def loglikelihood(self,
+                      ss):
         regime = ss.regime()
-        return self._regime_dist.pdf(regime)
+        with np.errstate(divide='ignore'):
+            loglikelihood = np.log(self._regime_dist.pdf(regime))
+        return loglikelihood

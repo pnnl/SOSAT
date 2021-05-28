@@ -35,7 +35,7 @@ class StressMeasurement(StressConstraint):
         """
         self._shmin_dist = shmin_dist
 
-    def likelihood(self, ss):
+    def loglikelihood(self, ss):
         """
         Compute the likelihood of each stress state in `ss` based on
         the measured stress
@@ -46,4 +46,4 @@ class StressMeasurement(StressConstraint):
             The stress states on which to evaluate the likelihood
         """
 
-        return self._shmin_dist.pdf(ss.shmin_grid)
+        return self._shmin_dist.logpdf(ss.shmin_grid)

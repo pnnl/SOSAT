@@ -32,7 +32,8 @@ def critical_friction(sig1, sig3, pp):
 
     arg = (sig1 - sig3) / (sig1 + sig3 - 2.0 * pp)
     phic = ma.arcsin(arg)
-    return ma.tan(phic)
+    muc = ma.tan(phic)
+    return muc
 
 
 class FaultConstraint(StressConstraint):
@@ -66,8 +67,8 @@ class FaultConstraint(StressConstraint):
         else:
             self.friction_dist = friction_dist
 
-    def likelihood(self,
-                   ss):
+    def loglikelihood(self,
+                      ss):
         """
         Computes the likelihood of each stress state
 
@@ -92,7 +93,7 @@ class FaultConstraint(StressConstraint):
         TF = regime < TFregime
         SS = (~NF) & (~TF)
         muc = ma.zeros(np.shape(ss.shmin_grid))
-        muc.mask = ss.shmin_grid
+        muc.mask = ss.shmin_grid.mask
         muc[NF] = critical_friction(sig1=ss.vertical_stress,
                                     sig3=ss.shmin_grid[NF],
                                     pp=ss.pore_pressure)
@@ -102,4 +103,7 @@ class FaultConstraint(StressConstraint):
         muc[TF] = critical_friction(sig1=ss.shmax_grid[TF],
                                     sig3=ss.vertical_stress,
                                     pp=ss.pore_pressure)
-        return self.friction_dist.sf(muc)
+
+        log_likelihood = self.friction_dist.logsf(muc)
+
+        return log_likelihood
