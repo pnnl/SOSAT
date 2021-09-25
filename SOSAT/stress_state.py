@@ -291,7 +291,7 @@ class StressState:
 
     def plot_posterior(self,
                        figwidth=5.0,
-                       figheight=5.0,
+                       figheight=3.5,
                        contour_levels=5,
                        cmap=plt.cm.Greys):
         """
@@ -321,7 +321,7 @@ class StressState:
         if not self._posterior_evaluated:
             self.evaluate_posterior()
 
-        fig = plt.figure(figsize=(figwidth, figwidth * 0.7))
+        fig = plt.figure(figsize=(figwidth, figheight))
         ax = fig.add_subplot(111)
         im = ax.contourf(self.shmin_grid,
                          self.shmax_grid,
