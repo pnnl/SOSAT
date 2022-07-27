@@ -25,7 +25,7 @@ def sighcritNF(sigv, pp, mu):
 
 class RejectionSampler:
     """
-    A calss used to generate samples of the posterior stressdistribution
+    A class used to generate samples of the posterior stressdistribution
     using a rejection sampling approach
 
     Parameters

@@ -61,7 +61,7 @@ class StressState:
          average mass density of all overlying formations
     pore_pressure : float
         formation pore pressure
-    depth_unit : str, optionsl
+    depth_unit : str, optional
         unit of measurement for depth, see list of units in pint
         package documentation
     density_unit : str, optional
@@ -169,7 +169,10 @@ class StressState:
                                 * self._avg_overburden_density
                                 * gravity).to(stress_unit).magnitude
         self.pore_pressure = pore_pressure * units(pressure_unit)
-        self.pore_pressure = self.pore_pressure.to(pressure_unit).magnitude
+
+        # convert pore pressure to stress unit in the case that it was
+        # passed in with a different unit
+        self.pore_pressure = self.pore_pressure.to(stress_unit).magnitude
         self._minimum_stress = min_stress_ratio * self.vertical_stress
         if self._minimum_stress < self.pore_pressure:
             self._minimum_stress = self.pore_pressure
@@ -274,20 +277,25 @@ class StressState:
         constructor of this class.
 
         The posterior distribution is computed by recursively applying
-        Baye's law using the likelihood function provided by each
+        Bayes' law using the likelihood function provided by each
         constraint object that has been added to this class.
         """
-        # initialize with the prior and use log likelihoods to update
-        log_posterior = np.log(self.psig)
-        for c in self._constraints:
-            loglikelihood = c.loglikelihood(self)
-            log_posterior = log_posterior + loglikelihood
 
-        self.posterior = np.exp(log_posterior)
-        # now normalize
-        tot = ma.sum(self.posterior)
-        self.posterior = self.posterior / tot
-        self._posterior_evaluated = True
+        # skip re-evaluation if no new constraints have been added
+        # since the last evaluation:
+        if not self._posterior_evaluated:
+
+            # initialize with the prior and use log likelihoods to update
+            log_posterior = np.log(self.psig)
+            for c in self._constraints:
+                loglikelihood = c.loglikelihood(self)
+                log_posterior = log_posterior + loglikelihood
+
+            self.posterior = np.exp(log_posterior)
+            # now normalize
+            tot = ma.sum(self.posterior)
+            self.posterior = self.posterior / tot
+            self._posterior_evaluated = True
 
     def plot_posterior(self,
                        figwidth=5.0,
