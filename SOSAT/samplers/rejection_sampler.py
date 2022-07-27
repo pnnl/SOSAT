@@ -52,7 +52,8 @@ class RejectionSampler:
         """
 
         # evaluate the poserior on the grid
-        self.SS.evaluate_posterior()
+        if not self.SS._posterior_evaluated:
+            self.SS.evaluate_posterior()
         pmax = np.max(self.SS.posterior)
 
         # scale to 0-1
