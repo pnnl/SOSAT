@@ -25,7 +25,7 @@ def sighcritNF(sigv, pp, mu):
 
 class RejectionSampler:
     """
-    A class used to generate samples of the posterior stressdistribution
+    A class used to generate samples of the posterior stress distribution
     using a rejection sampling approach
 
     Parameters
@@ -52,8 +52,7 @@ class RejectionSampler:
         """
 
         # evaluate the poserior on the grid
-        if not self.SS._posterior_evaluated:
-            self.SS.evaluate_posterior()
+        self.SS.evaluate_posterior()
         pmax = np.max(self.SS.posterior)
 
         # scale to 0-1

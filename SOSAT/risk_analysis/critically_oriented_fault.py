@@ -30,7 +30,7 @@ class CriticalFaultActivation:
         A probability distribution for the stress path coefficient
     mu_dist : an object derived from `scipy.stats.rv_continuous`,
               optional
-        A probability distributino for the fault friction coefficient;
+        A probability distribution for the fault friction coefficient;
         defaults to a lognormal distribution with s=0.14 and scale=0.7
         passed into `scipy.stats.lognorm`
     """
@@ -96,7 +96,7 @@ class CriticalFaultActivation:
 
             # evaluate faulting regime at perturbed state
             NF = sv_eff > shmax_eff
-            TF = sv_eff < shmin_eff
+            TF = sv_eff < shmax_eff
             SS = ~NF & ~TF
 
             S1_eff = np.zeros(Nsamples, dtype=np.float64)

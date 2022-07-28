@@ -15,6 +15,7 @@ This test is the usage example given in the documentation to make sure
 that it runs correctly with each commit
 '''
 
+
 def test_usage():
     # depth in meters
     depth = 1228.3
@@ -26,9 +27,8 @@ def test_usage():
     pore_pressure = pore_pressure_grad * (1.0 / 1000) * depth
 
     ss = StressState(depth=depth,
-                    avg_overburden_density=avg_overburden_density,
-                    pore_pressure=pore_pressure)
-
+                     avg_overburden_density=avg_overburden_density,
+                     pore_pressure=pore_pressure)
 
     # the cohesion is chosen to be uniform between 25 and 55 MPa
     # and a friction angle of about 15 degrees
@@ -72,12 +72,12 @@ def test_usage():
 
     # create a faulting regime constraint
     frc = FaultingRegimeConstraint(SU(w_NF=0.1, w_SS=15.0, w_TF=3.0,
-                                theta1=np.sqrt(2.0) * 0.5, k1=300.0,
-                                theta2=-np.sqrt(2.0) * 0.5, k2=100.0))
+                                      theta1=np.sqrt(2.0) * 0.5, k1=300.0,
+                                      theta2=-np.sqrt(2.0) * 0.5, k2=100.0))
 
     # create a stress measurement constraint
     smc = StressMeasurement(shmin_dist=uniform(loc=25.0,
-                                            scale=5.0))
+                                               scale=5.0))
 
     fc = FaultConstraint()
 
@@ -103,19 +103,18 @@ def test_usage():
     # which is required to accurately quantify faul activation risk
     # when the risk of activation is low (rare event sampling)
     cfa_fig = cfa.PlotFailureProbability(Npressures=100,
-                                        Nsamples=1e5)
+                                         Nsamples=1e5)
     cfa_fig.savefig("Critical_Fault_Activation_Probability.png")
 
-    # compute the 95% confidence intervals for the horizontal principal stresses
+    # compute the 95% confidence intervals for the horizontal stresses
 
     shmin_ll, shmin_ul = ss.get_shmin_confidence_intervals(0.95)
     print("shmin_ll= ", shmin_ll)
     shmin_ll == pytest.approx(25.34)
     print("shmin_ul= ", shmin_ul)
-    shmin_ul ==pytest.approx(29.79)
+    shmin_ul == pytest.approx(29.79)
     shmax_ll, shmax_ul = ss.get_shmax_confidence_intervals(0.95)
     print("shmax_ll= ", shmax_ll)
     shmax_ll == pytest.approx(32.47)
     print("shmax_ul= ", shmax_ul)
     shmax_ul == pytest.approx(73.87)
-

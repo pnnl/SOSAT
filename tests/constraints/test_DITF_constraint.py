@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from SOSAT import StressState
 from SOSAT.constraints import DITFConstraint
 
+
 def test_DITF():
     # depth in meters
     depth = 1228.3
@@ -17,8 +18,8 @@ def test_DITF():
     pore_pressure = pore_pressure_grad * (1.0 / 1000) * depth
 
     ss = StressState(depth=depth,
-                    avg_overburden_density=avg_overburden_density,
-                    pore_pressure=pore_pressure)
+                     avg_overburden_density=avg_overburden_density,
+                     pore_pressure=pore_pressure)
 
     # probability density for the minimum tensile strength over
     # the interval
@@ -41,21 +42,20 @@ def test_DITF():
     PR = 0.25
     CTE = 2.4e-6
     DITFc = DITFConstraint(DITF_exists=False,
-                        mud_pressure_dist=mud_pressure_dist,
-                        mud_temperature_dist=mud_temperature_dist,
-                        tensile_strength_dist=tensile_strength_dist,
-                        formation_temperature=formation_temperature,
-                        YM=YM,
-                        PR=PR,
-                        CTE=CTE,
-                        pressure_unit='MPa')
+                           mud_pressure_dist=mud_pressure_dist,
+                           mud_temperature_dist=mud_temperature_dist,
+                           tensile_strength_dist=tensile_strength_dist,
+                           formation_temperature=formation_temperature,
+                           YM=YM,
+                           PR=PR,
+                           CTE=CTE,
+                           pressure_unit='MPa')
     ss.add_constraint(DITFc)
     fig = ss.plot_posterior()
-    plt.savefig("DITF_constraint_posterior.png")
+    fig.savefig("DITF_constraint_posterior.png")
 
     shmax_ll, shmax_ul = ss.get_shmax_confidence_intervals(0.95)
     print("shmax_ll= ", shmax_ll)
     shmax_ll == pytest.approx(34.2515)
     print("shmax_ul= ", shmax_ul)
     shmax_ul == pytest.approx(99.255)
-

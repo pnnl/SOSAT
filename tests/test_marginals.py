@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from SOSAT import StressState
 from SOSAT.constraints import FaultConstraint
 
+
 def test_marginals():
     # depth in meters
     depth = 1228.3
@@ -17,8 +18,8 @@ def test_marginals():
     pore_pressure = pore_pressure_grad * (1.0 / 1000) * depth
 
     ss = StressState(depth=depth,
-                    avg_overburden_density=avg_overburden_density,
-                    pore_pressure=pore_pressure)
+                     avg_overburden_density=avg_overburden_density,
+                     pore_pressure=pore_pressure)
     # friction_mu = 0.7
     # friction_std = 0.15
     # mudist = lognorm(scale=friction_mu,

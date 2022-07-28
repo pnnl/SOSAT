@@ -2,8 +2,8 @@ from logging import log
 import numpy as np
 from numpy import ma
 import pint
-
 from .constraint_base import StressConstraint
+
 
 units = pint.UnitRegistry()
 
