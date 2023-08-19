@@ -68,10 +68,6 @@ class DITFConstraint(StressConstraint):
     pressure_unit : str, optional
         The unit used for UCS and Young's modulus; should be a unit
         recognized by `pint.UnitRegistry`; defaults to 'Pa'
-    temperature_unit :str, optional
-        The unit used to specify the mud temperature distribution and
-        the formation temperature; should be a unit recognized by
-        `pint.UnitRegistry`; defaults to degrees C ('degC')
 
     Notes
     -----
@@ -170,7 +166,7 @@ class DITFConstraint(StressConstraint):
                 TS_i = TS_i.to(ss.stress_unit).magnitude
 
                 deltaP = mud_pressure_i - ss.pore_pressure
-                deltaT = mud_temperature_i - self._formation_temperature
+                deltaT = self._formation_temperature - mud_temperature_i
                 DITF = sig_nominal - deltaP - TEF * deltaT + TS_i
                 NDITF[DITF < 0.0] += 1
             iter += 1
