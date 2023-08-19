@@ -246,7 +246,7 @@ class BreakoutConstraint(StressConstraint):
                 # this will have units of delta temperature which is
                 # assumed to be consistent between the user-supplied
                 # mud temperature and formation temperature
-                deltaT = mud_temperature_i - self._formation_temperature
+                deltaT = self._formation_temperature - mud_temperature_i
 
                 # compute the mud pressure effect on the nominal maximum
                 # hoop stress
