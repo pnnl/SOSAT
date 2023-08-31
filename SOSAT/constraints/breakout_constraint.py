@@ -255,7 +255,7 @@ class BreakoutConstraint(StressConstraint):
 
                 # the stresses going in here shoudl all have had the pint
                 # units stripped after ensuring they were compatible
-                BO = MCfail(sig1, sig3, phi_i, Co_i)
+                BO = MCfail(sig1, sig3, rock_friction_i, Co_i)
                 # increment the breakout count at locations where BO > 0.0
                 NBO[BO > 0.0] += 1
             # increment the iteration count and realization count
