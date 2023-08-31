@@ -234,8 +234,9 @@ class BreakoutConstraint(StressConstraint):
                 rock_friction_i = rock_friction_i.to('radians').magnitude
 
                 # convert into more convenient parameters
-                phi_i = np.arctan(rock_friction_i)
-                Co_i = UCS_i * 0.5 * (1.0 - np.sin(phi_i)) / np.cos(phi_i)
+                # phi_i = np.arctan(rock_friction_i)
+                # Co_i = UCS_i * 0.5 * (1.0 - np.sin(phi_i)) / np.cos(phi_i)
+                Co_i = UCS_i * 0.5 * (1.0 - np.sin(rock_friction_i)) / np.cos(rock_friction_i)
 
                 # these should both have the same units now and the pint
                 # unit should have been stripped
