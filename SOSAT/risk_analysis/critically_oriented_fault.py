@@ -96,7 +96,7 @@ class CriticalFaultActivation:
 
             # evaluate faulting regime at perturbed state
             NF = sv_eff > shmax_eff
-            TF = sv_eff < shmax_eff
+            TF = sv_eff < shmin_eff
             SS = ~NF & ~TF
 
             S1_eff = np.zeros(Nsamples, dtype=np.float64)
