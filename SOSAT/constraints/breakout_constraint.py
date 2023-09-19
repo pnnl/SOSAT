@@ -234,8 +234,10 @@ class BreakoutConstraint(StressConstraint):
                 rock_friction_i = rock_friction_i.to('radians').magnitude
 
                 # convert into more convenient parameters
-                phi_i = np.arctan(rock_friction_i)
-                Co_i = UCS_i * 0.5 * (1.0 - np.sin(phi_i)) / np.cos(phi_i)
+                # phi_i = np.arctan(rock_friction_i)
+                # Co_i = UCS_i * 0.5 * (1.0 - np.sin(phi_i)) / np.cos(phi_i)
+                Co_i = UCS_i * 0.5 * (1.0 - np.sin(rock_friction_i)) \
+                       / np.cos(rock_friction_i)
 
                 # these should both have the same units now and the pint
                 # unit should have been stripped
@@ -254,7 +256,7 @@ class BreakoutConstraint(StressConstraint):
 
                 # the stresses going in here shoudl all have had the pint
                 # units stripped after ensuring they were compatible
-                BO = MCfail(sig1, sig3, phi_i, Co_i)
+                BO = MCfail(sig1, sig3, rock_friction_i, Co_i)
                 # increment the breakout count at locations where BO > 0.0
                 NBO[BO > 0.0] += 1
             # increment the iteration count and realization count
