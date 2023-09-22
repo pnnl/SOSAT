@@ -1,5 +1,6 @@
 from .fault_constraint import FaultConstraint
 from .faulting_regime_constraint import FaultingRegimeConstraint, SU
+from .faulting_regime_A_phi_constraint import FaultingRegimeAphiConstraint
 from .breakout_constraint import BreakoutConstraint
 from .DITF_constraint import DITFConstraint
 from .stress_measurement_constraint import StressMeasurement
