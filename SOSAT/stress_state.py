@@ -263,7 +263,7 @@ class StressState:
         """
 
         # initiate empty value store
-        Sv_grid = self.vertical_stress*np.ones_like(self.shmax_grid)
+        Sv_grid = self.vertical_stress * np.ones_like(self.shmax_grid)
         A_phi_grid = np.zeros_like(self.shmax_grid)
         sigma1 = np.zeros_like(self.shmax_grid)
         sigma2 = np.zeros_like(self.shmax_grid)
@@ -284,13 +284,13 @@ class StressState:
         sigma2[TFindex] = self.shmin_grid[TFindex]
 
         # calculate A_phi
-        phi = (sigma2-sigma3)/(sigma1-sigma3)
+        phi = (sigma2 - sigma3) / (sigma1 - sigma3)
         n_NF = 0
         n_SS = 1
         n_TF = 2
-        A_phi_grid[NFindex] = (n_NF+0.5)+(-1)**n_NF*(phi[NFindex]-0.5)
-        A_phi_grid[SSindex] = (n_SS+0.5)+(-1)**n_SS*(phi[SSindex]-0.5)
-        A_phi_grid[TFindex] = (n_TF+0.5)+(-1)**n_TF*(phi[TFindex]-0.5)
+        A_phi_grid[NFindex] = (n_NF + 0.5) + (-1)**n_NF * (phi[NFindex] - 0.5)
+        A_phi_grid[SSindex] = (n_SS + 0.5) + (-1)**n_SS * (phi[SSindex] - 0.5)
+        A_phi_grid[TFindex] = (n_TF + 0.5) + (-1)**n_TF * (phi[TFindex] - 0.5)
 
         return A_phi_grid
 
