@@ -15,6 +15,7 @@ __version__ = '0.3.2'
 from .stress_state import StressState, units
 from .constraints import FaultConstraint
 from .constraints import FaultingRegimeConstraint, SU
+from .constraints import FaultingRegimeAphiConstraint
 from .constraints import BreakoutConstraint
 from .constraints import DITFConstraint
 from .constraints import StressMeasurement

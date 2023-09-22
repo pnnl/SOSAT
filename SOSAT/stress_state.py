@@ -237,6 +237,63 @@ class StressState:
         ret.mask = self.shmin_grid.mask
         return ret
 
+    def A_phi_calculate(self):
+        """
+        Computes the scalar A_phi value for each stress state
+        included in the class. The scalar regime parameter varies from
+        0 to 1.
+        The scalar measure of the faulting regime is defined
+        in Simpson (1997):
+
+            phi = (sigma2-sigma3)/ (sigma1-sigma3)
+            n = 0, 1, and 2 respectively for normal, strike-slip,
+            and reverse faulting regime respectively.
+            A_phi = (n+0.5) + (-1)^n*(phi-0.5)
+
+        Using this definition, A_phi value ranges from 0 to 3, where
+        [0,1] corresponds to normal faulting regime,
+        [1,2] corresponds to strike-slip faulting regime,  and
+        [2,3] corresponds to reverse faulting regime.
+
+        Returns
+        -------
+        2D Numpy MaskedArray with dtype=float
+            The array is square with dimensions :attr:`nbins`
+
+        """
+
+        # initiate empty value store
+        Sv_grid = self.vertical_stress * np.ones_like(self.shmax_grid)
+        A_phi_grid = np.zeros_like(self.shmax_grid)
+        sigma1 = np.zeros_like(self.shmax_grid)
+        sigma2 = np.zeros_like(self.shmax_grid)
+        sigma3 = np.zeros_like(self.shmax_grid)
+
+        # Get three principal stresses
+        NFindex = self.vertical_stress > self.shmax_grid
+        TFindex = self.shmin_grid > self.vertical_stress
+        SSindex = ~NFindex & ~TFindex
+        sigma1[NFindex] = Sv_grid[NFindex]
+        sigma1[SSindex] = self.shmax_grid[SSindex]
+        sigma1[TFindex] = self.shmax_grid[TFindex]
+        sigma3[NFindex] = self.shmin_grid[NFindex]
+        sigma3[SSindex] = self.shmin_grid[SSindex]
+        sigma3[TFindex] = Sv_grid[TFindex]
+        sigma2[NFindex] = self.shmax_grid[NFindex]
+        sigma2[SSindex] = Sv_grid[SSindex]
+        sigma2[TFindex] = self.shmin_grid[TFindex]
+
+        # calculate A_phi
+        phi = (sigma2 - sigma3) / (sigma1 - sigma3)
+        n_NF = 0
+        n_SS = 1
+        n_TF = 2
+        A_phi_grid[NFindex] = (n_NF + 0.5) + (-1)**n_NF * (phi[NFindex] - 0.5)
+        A_phi_grid[SSindex] = (n_SS + 0.5) + (-1)**n_SS * (phi[SSindex] - 0.5)
+        A_phi_grid[TFindex] = (n_TF + 0.5) + (-1)**n_TF * (phi[TFindex] - 0.5)
+
+        return A_phi_grid
+
     def add_constraint(self, constraint):
         """
         Method to add a constraint to the stress state probability
