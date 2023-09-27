@@ -21,3 +21,4 @@ from .constraints import DITFConstraint
 from .constraints import StressMeasurement
 from .samplers import RejectionSampler
 from .risk_analysis import CriticalFaultActivation
+from .risk_analysis import UserPrescribedFaultActivation
