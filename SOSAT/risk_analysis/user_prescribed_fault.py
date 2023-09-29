@@ -1,10 +1,79 @@
 import numpy as np
 from scipy.stats import lognorm
-from scipy.stats import vonmises_fisher
+from scipy.stats import beta
+from scipy.stats import uniform
 import matplotlib.pyplot as plt
 
 from ..samplers import RejectionSampler
 
+
+def rand_vMF (vec, K, Nsamples):
+    """
+    Random sampling from von Mises - Fisher distribution with mean vector
+    (vec) and concentration K. Based on method proposed by Pinzon and
+    Jung (2023).
+
+    Parameters
+    ----------
+    vec : list of length 3
+        The components of the mean vector.
+    K : float
+        The concentration parameter.
+    """
+
+    # Check mean vector is a unit vector
+    if np.round(np.linalg.norm(vec),6) != 1.0:
+        error_message = "Vector supplied to the von Mises-Fisher sampler" + \
+            " is not a unit vector."
+        raise ValueError(error_message)
+    # Check mean vector has length 3
+    if np.shape(vec) != (1,3):
+        error_message = "Vector supplied to the von Mises-Fisher sampler" + \
+            " is not three-dimensional."
+
+    Nsamples = int(Nsamples)
+    vec = np.array(vec)
+
+    # Samples perpendicular to mean vector
+    # Random vectors
+    Z = np.random.normal(0, 1, (Nsamples, 3))
+    # Normalize to unit vectors
+    Z /= np.linalg.norm(Z, axis=1 , keepdims=True)
+    # Ensure they are perpendicular to mean vector
+    Z = Z - (Z @ vec[:, np.newaxis]) * vec[np.newaxis, :]
+    # Normalize to unit vectors
+    Z /= np.linalg.norm(Z, axis=1 , keepdims=True)
+
+    # Sample theta angles (cos and sin)
+    theta_cos = vMF_angle(K, Nsamples)
+    theta_sin = np.sqrt(1 - theta_cos**2)
+
+    X = Z * theta_sin[:, np.newaxis] + theta_cos[:, np.newaxis] * vec[np.newaxis, :]
+
+    return X.reshape((Nsamples , 3))
+
+def vMF_angle (K, Nsamples):
+    """
+    Create samples with density function given by
+    p(t) = someConstant * (1-t**2) * exp(K *t)
+    """
+
+    t_i = np.sqrt(1 + (1 / K)**2) - 1 / K
+    r_i = t_i
+    logt_i = K * t_i + 2 * np.log(1 - r_i * t_i)
+    count = 0
+    results = []
+    while count < Nsamples:
+        m = min(Nsamples, int((Nsamples - count) * 1.5))
+        t = np.random.beta(1, 1, m)
+        t = 2 * t - 1
+        t = (r_i + t) / (1 + r_i * t)
+        log_acc = K * t + 2 * np.log(1 - r_i * t) - logt_i
+        t = t[np.random.random(m) < np .exp(log_acc)]
+        results.append(t)
+        count += len(results[-1])
+
+    return np.concatenate (results)[:Nsamples]
 
 class UserPrescribedFaultActivation:
     """
@@ -121,8 +190,7 @@ class UserPrescribedFaultActivation:
         # n_shmax_m = [x1, x2, x3] = [x_north, x_east, x_down]
         n_shmax_m = [np.cos(np.radians(self.ss_azi_m)),
                      np.sin(np.radians(self.ss_azi_m)), 0.0]
-        shmax_dist = vonmises_fisher(n_shmax_m, self.ss_K)
-        n_shmax = shmax_dist.rvs(Nsamples)
+        n_shmax = rand_vMF(n_shmax_m, self.ss_K, Nsamples)
         # Project n_shmax back into horizontal plane and extend to unity
         n_shmax = np.array([[x[0], x[1], 0.0]
                             / (np.sqrt(x[0]**2.0 + x[1]**2.0))
@@ -142,8 +210,7 @@ class UserPrescribedFaultActivation:
                      np.sin(np.radians(self.dip_m))
                      * np.cos(np.radians(self.strike_m)),
                      -np.cos(np.radians(self.dip_m))]
-        fault_dist = vonmises_fisher(n_fault_m, self.fault_K)
-        n_fault = fault_dist.rvs(Nsamples)
+        n_fault = rand_vMF(n_fault_m, self.fault_K, Nsamples)
         # Calculate sample strike and dip angles from normals
         # Avoid np.arccos() argument greater than 1 (caused by rounding errors)
         dip_fault = np.degrees(np.arccos(-n_fault[:, 2]))
