@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from ..samplers import RejectionSampler
 
 
-def rand_vMF (vec, K, Nsamples):
+def rand_vMF(vec, K, Nsamples):
     """
-    Random sampling from von Mises - Fisher distribution with mean vector
-    (vec) and concentration K. Based on method proposed by Pinzon and
+    Random sampling from von Mises - Fisher distribution with mean
+    vector (vec) and concentration K. Based on method proposed by Pinzon and
     Jung (2023).
 
     Parameters
@@ -22,12 +22,12 @@ def rand_vMF (vec, K, Nsamples):
     """
 
     # Check mean vector is a unit vector
-    if np.round(np.linalg.norm(vec),6) != 1.0:
+    if np.round(np.linalg.norm(vec), 6) != 1.0:
         error_message = "Vector supplied to the von Mises-Fisher sampler" + \
             " is not a unit vector."
         raise ValueError(error_message)
     # Check mean vector has length 3
-    if np.shape(vec) != (1,3):
+    if np.shape(vec) != (1, 3):
         error_message = "Vector supplied to the von Mises-Fisher sampler" + \
             " is not three-dimensional."
 
@@ -38,21 +38,23 @@ def rand_vMF (vec, K, Nsamples):
     # Random vectors
     Z = np.random.normal(0, 1, (Nsamples, 3))
     # Normalize to unit vectors
-    Z /= np.linalg.norm(Z, axis=1 , keepdims=True)
+    Z /= np.linalg.norm(Z, axis=1, keepdims=True)
     # Ensure they are perpendicular to mean vector
     Z = Z - (Z @ vec[:, np.newaxis]) * vec[np.newaxis, :]
     # Normalize to unit vectors
-    Z /= np.linalg.norm(Z, axis=1 , keepdims=True)
+    Z /= np.linalg.norm(Z, axis=1, keepdims=True)
 
     # Sample theta angles (cos and sin)
     theta_cos = vMF_angle(K, Nsamples)
     theta_sin = np.sqrt(1 - theta_cos**2)
 
-    X = Z * theta_sin[:, np.newaxis] + theta_cos[:, np.newaxis] * vec[np.newaxis, :]
+    X = Z * theta_sin[:, np.newaxis] + theta_cos[:, np.newaxis]\
+        * vec[np.newaxis, :]
 
-    return X.reshape((Nsamples , 3))
+    return X.reshape((Nsamples, 3))
 
-def vMF_angle (K, Nsamples):
+
+def vMF_angle(K, Nsamples):
     """
     Create samples with density function given by
     p(t) = someConstant * (1-t**2) * exp(K *t)
@@ -73,7 +75,8 @@ def vMF_angle (K, Nsamples):
         results.append(t)
         count += len(results[-1])
 
-    return np.concatenate (results)[:Nsamples]
+    return np.concatenate(results)[:Nsamples]
+
 
 class UserPrescribedFaultActivation:
     """
