@@ -3,8 +3,11 @@ from scipy.stats import lognorm
 from scipy.stats import beta
 from scipy.stats import uniform
 import matplotlib.pyplot as plt
+import pint
 
 from ..samplers import RejectionSampler
+
+units = pint.UnitRegistry()
 
 
 class HydraulicFracturing:
@@ -29,7 +32,8 @@ class HydraulicFracturing:
                  ss,
                  dPmax,
                  gamma_dist,
-                 T_dist=None):
+                 T_dist=None,
+                 T_unit="MPa"):
         """
         Constructor method
         """
@@ -37,10 +41,7 @@ class HydraulicFracturing:
         self.ss = ss
         self.gamma_dist = gamma_dist
         self.T_dist = T_dist
-        # if T_dist is None:
-        #     self.T_dist = 0.0
-        # else:
-        #     self.T_dist = T_dist
+        self.T_unit = T_unit
 
     def EvaluatePfail(self, Npressures=20, Nsamples=1e6):
         """
@@ -74,7 +75,8 @@ class HydraulicFracturing:
 
         # Generate samples of uniaxial tensile strength
         if self.T_dist is not None:
-            T = self.T_dist.rvs(Nsamples)
+            T = self.T_dist.rvs(Nsamples) * units(self.T_unit)
+            T = T.to(self.ss.stress_unit).magnitude
 
         Po = self.ss.pore_pressure
         dP_array = np.linspace(0.0, self.dPmax, Npressures)
