@@ -1,2 +1,3 @@
 from .critically_oriented_fault import CriticalFaultActivation
 from .user_prescribed_fault import UserPrescribedFaultActivation
+from .hydraulic_fracture import HydraulicFracturing
