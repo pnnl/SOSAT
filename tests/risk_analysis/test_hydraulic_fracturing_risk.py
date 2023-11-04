@@ -30,8 +30,9 @@ def test_hf():
     T_dist = uniform(0.0, 5.0)
 
     hf = HydraulicFracturing(ss, dPmax, gamma_dist)
-
-    pressures, Pfail = hf.EvaluatePfail()
+    shmin, shmax, sv = hf.SampleStressPoints(Nsamples=1e5)
+    pressures, Pfail = hf.EvaluatePfail(
+        shmin=shmin, shmax=shmax, sv=sv)
 
     print("pressures= ", pressures)
     print("Pfail= ", Pfail)

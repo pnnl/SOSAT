@@ -52,7 +52,30 @@ class CriticalFaultActivation:
         else:
             self.mu_dist = mu_dist
 
-    def EvaluatePfail(self, Npressures=20, Nsamples=1e6):
+    def SampleStressPoints(self, Nsamples=1e6):
+        """
+        A method to sample three principal stress points
+        from the joint stress posterior distribution
+
+        Parameters
+        ----------
+        Nsamples : int
+            The number of stress samples to use for the analysis
+
+        Returns
+        -------
+        shmin, shmax, sv: arrays containing samples of the three
+        principal stress
+
+        """
+        Nsamples = int(Nsamples)
+        # generate samples of stress state
+        stress_sampler = RejectionSampler(self.ss)
+        shmin, shmax, sv = stress_sampler.GenerateSamples(Nsamples)
+        return shmin, shmax, sv
+
+    def EvaluatePfail(self, Npressures=20, Nsamples=1e6,
+                      shmin=None, shmax=None, sv=None):
         """
         A method to evaluate the failure probability at pressures
         between the native pore pressure at self.dPmax.
@@ -66,6 +89,10 @@ class CriticalFaultActivation:
         Nsamples : int
             The number of stress samples to use for the analysis
 
+        shmin, shmax, sv: arrays containing samples of the three
+        principal stress; default to be None; They can be calculated
+        using self.SampleStressPoints(Nsamples=1e6)
+
         Returns
         -------
         P, pfail : `numpy.ndarray`
@@ -74,10 +101,15 @@ class CriticalFaultActivation:
         """
         Nsamples = int(Nsamples)
         Npressures = int(Npressures)
-        # generate samples of stress state
-        stress_sampler = RejectionSampler(self.ss)
 
-        shmin, shmax, sv = stress_sampler.GenerateSamples(Nsamples)
+        # generate samples of stress state if there is no stress inputs
+        if shmin is None or shmax is None or sv is None:
+            stress_sampler = RejectionSampler(self.ss)
+            shmin, shmax, sv = stress_sampler.GenerateSamples(Nsamples)
+        else:
+            # make sure the Nsamples equals to the given length of shmin
+            Nsamples = len(sv)
+
         gamma = self.gamma_dist.rvs(Nsamples)
         mu = self.mu_dist.rvs(Nsamples)
 

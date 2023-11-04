@@ -31,7 +31,9 @@ def test_cfa():
     dPmax = 4.0
     gamma_dist = uniform(0.4, (0.6 - 0.4))
     cfa = CriticalFaultActivation(ss, dPmax, gamma_dist)
-    pressures, Pfail = cfa.EvaluatePfail()
+    shmin, shmax, sv = cfa.SampleStressPoints()
+    pressures, Pfail = cfa.EvaluatePfail(
+        shmin=shmin, shmax=shmax, sv=sv)
     print("pressures= ", pressures)
     print("Pfail= ", Pfail)
     pressures[0] == pytest.approx(12.227)
