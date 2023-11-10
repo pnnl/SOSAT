@@ -54,7 +54,7 @@ def test_hf():
     # Pfail_nogamma should be larger than Pfail since it is
     # more conservative
     assert Pfail_nogamma[-1] > Pfail[-1]
-    fig = hf.PlotFailureProbability()
+    fig = hf_nogamma.PlotFailureProbability()
     fig.savefig("HF_Probability_nogamma.png")
 
     # case 3: Have tensile strength, given gamma
