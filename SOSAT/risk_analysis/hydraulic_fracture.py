@@ -31,7 +31,7 @@ class HydraulicFracturing:
     def __init__(self,
                  ss,
                  dPmax,
-                 gamma_dist,
+                 gamma_dist=None,
                  T_dist=None,
                  T_unit="MPa"):
         """
@@ -102,7 +102,10 @@ class HydraulicFracturing:
             Nsamples = len(sv)
 
         # Generate samples of stress path coefficients
-        gamma = self.gamma_dist.rvs(Nsamples)
+        if self.gamma_dist is None:
+            gamma = 0
+        else:
+            gamma = self.gamma_dist.rvs(Nsamples)
 
         # Generate samples of uniaxial tensile strength
         if self.T_dist is not None:
@@ -114,10 +117,13 @@ class HydraulicFracturing:
         Pfail = np.zeros_like(dP_array)
         i = 0
         for dP in dP_array:
+            # If given gamma_dist,
             # Evaluate effective stress using the stress path coefficient
             # for horizontal directions and assuming a constant total
             # stress in the vertical direction so that the effective
             # vertical stress decreases by the full pressure increment
+            # If not given gamma_dist, then set gamma = 0,
+            # we are comparing Po + dP with the total stress
             shmin_eff = shmin - Po + (gamma - 1.0) * dP
             shmax_eff = shmax - Po + (gamma - 1.0) * dP
             sv_eff = sv - Po - dP

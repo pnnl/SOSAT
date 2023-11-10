@@ -29,6 +29,7 @@ def test_hf():
     # Tensile strength distribution
     T_dist = uniform(0.0, 5.0)
 
+    # case 1: no tensile strength, given gamma
     hf = HydraulicFracturing(ss, dPmax, gamma_dist)
     shmin, shmax, sv = hf.SampleStressPoints(Nsamples=1e5)
     pressures, Pfail = hf.EvaluatePfail(
@@ -46,6 +47,17 @@ def test_hf():
 
     fig.savefig("HF_Probability.png")
 
+    # case 2: No tensile strength, no given gamma
+    hf_nogamma = HydraulicFracturing(ss, dPmax)
+    pressures_nogamma, Pfail_nogamma = hf_nogamma.EvaluatePfail(
+        shmin=shmin, shmax=shmax, sv=sv)
+    # Pfail_nogamma should be larger than Pfail since it is
+    # more conservative
+    assert Pfail_nogamma[-1] > Pfail[-1]
+    fig = hf.PlotFailureProbability()
+    fig.savefig("HF_Probability_nogamma.png")
+
+    # case 3: Have tensile strength, given gamma
     hf_T = HydraulicFracturing(ss, dPmax, gamma_dist, T_dist)
 
     pressures_T, Pfail_T = hf_T.EvaluatePfail()
@@ -60,4 +72,4 @@ def test_hf():
 
     fig = hf_T.PlotFailureProbability()
 
-    fig.savefig("HF_Probability_with_Tesnile_Strength.png")
+    fig.savefig("HF_Probability_with_Tensile_Strength.png")
