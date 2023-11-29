@@ -349,6 +349,12 @@ class StressState:
                 log_posterior = log_posterior + loglikelihood
 
             self.posterior = np.exp(log_posterior)
+            # reset the mask to account for the problem of mask
+            # getting changed when ma.log(0)=Masked in the
+            # c.loglikelihood(self) function
+            # set the posterior to zero where the mask has changed
+            indicator = self.posterior.mask != self.shmin_grid.mask
+            self.posterior[indicator] = 0
             # now normalize
             tot = ma.sum(self.posterior)
             self.posterior = self.posterior / tot
