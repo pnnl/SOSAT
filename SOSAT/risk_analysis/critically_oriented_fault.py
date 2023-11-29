@@ -165,7 +165,7 @@ class CriticalFaultActivation:
         fig = plt.figure(figsize=(figwidth, figwidth * 0.7))
         ax = fig.add_subplot(111)
         ax.plot(P, Pfail, "k")
-        ax.set_xlabel("Pore Pressure")
+        ax.set_xlabel("Pore Pressure (" + self.ss.stress_unit + ")")
         ax.set_ylabel("Probability of Fault Activation")
         plt.tight_layout()
 
