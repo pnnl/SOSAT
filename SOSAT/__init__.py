@@ -10,7 +10,7 @@ a probability density function for the principal stress components.
 
 __author__ = """Jeff Burghardt"""
 __email__ = 'jeffrey.burghardt@pnnl.gov'
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
 from .stress_state import StressState, units
 from .constraints import FaultConstraint
