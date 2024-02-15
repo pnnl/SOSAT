@@ -157,11 +157,12 @@ class HydraulicFracturing:
                                figwidth=5.0):
 
         P, Pfail = self.EvaluatePfail(Npressures, Nsamples)
+        dP = P - self.ss.pore_pressure
 
         fig = plt.figure(figsize=(figwidth, figwidth * 0.7))
         ax = fig.add_subplot(111)
-        ax.plot(P, Pfail, "k")
-        ax.set_xlabel("Pore Pressure (" + self.ss.stress_unit + ")")
+        ax.plot(dP, Pfail, "k")  # change to plot dP versus Pfail
+        ax.set_xlabel("Pore Pressure Change (" + self.ss.stress_unit + ")")
         ax.set_ylabel("Probability of Hydraulic Fracturing")
         plt.tight_layout()
 
