@@ -39,6 +39,8 @@ def test_upfa():
                                          fault_K=fault_K)
     n_shmax, n_fault, n_fault_p, ss_azi, strike_fault, dip_fault =\
         upfa.CreateOrientations()
+
+    # case 1: didn't pre-sample stress and fault points
     pressures, Pfail = upfa.EvaluatePfail()
 
     print("mean ss_azi = ", np.mean(ss_azi))
@@ -59,6 +61,28 @@ def test_upfa():
     pressures[-1] == pytest.approx(ss.pore_pressure + dPmax)
     Pfail[-1] == pytest.approx(0.5153, rel=0.5e-1)
 
-    fig = upfa.PlotFailureProbability()
+    # case 2: pre-sample stress points
+    shmin, shmax, sv = upfa.SampleStressPoints()
+    pressures, Pfail = upfa.EvaluatePfail(
+        shmin=shmin, shmax=shmax, sv=sv)
 
+    pressures[0] == pytest.approx(12.227, rel=1e-2)
+    Pfail[0] == pytest.approx(0.0533, rel=0.5e-1)
+    pressures[-1] == pytest.approx(ss.pore_pressure + dPmax)
+    Pfail[-1] == pytest.approx(0.5153, rel=0.5e-1)
+
+    # case 3: pre-sample stress points and fault points
+    _, _, n_fault_p, _, _, _ = upfa.CreateOrientations()
+    pressures, Pfail = upfa.EvaluatePfail(
+        shmin=shmin, shmax=shmax, sv=sv, n_fault_p=n_fault_p)
+
+    pressures[0] == pytest.approx(12.227, rel=1e-2)
+    Pfail[0] == pytest.approx(0.0533, rel=0.5e-1)
+    pressures[-1] == pytest.approx(ss.pore_pressure + dPmax)
+    Pfail[-1] == pytest.approx(0.5153, rel=0.5e-1)
+
+    fig = upfa.PlotFailureProbability()
     fig.savefig("User_Fault_Activation_Probability.png")
+
+    fig = upfa.PlotFailureProbability(n_fault_p=n_fault_p)
+    fig.savefig("User_Fault_Activation_Probability_inputfault.png")
