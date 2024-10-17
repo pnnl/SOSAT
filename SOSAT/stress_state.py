@@ -3,6 +3,7 @@ import numpy.ma as ma
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import pint
+import scipy.stats
 units = pint.UnitRegistry()
 
 """
@@ -481,3 +482,144 @@ class StressState:
         i_low = np.argmax(shmax_cdf > (1.0 - confidence))
         i_high = np.argmax(shmax_cdf > confidence)
         return sigvec[i_low], sigvec[i_high]
+
+class PostOpStressState(StressState):
+    """
+    A class to contain all data necessary to define the probability
+    distribution for all possible stress states at a given point in the
+    subsurface at some given post-operation state with a deterministic
+    change in pore pressure. 
+    Attributes
+    ----------
+    preOp_stress_state : A `SOSAT.StressState` object
+        The stress state to use to make the evaluation
+    gamma_dist : an object derived from `scipy.stats.rv_continuous`
+        A probability distribution for the stress path coefficient
+    dP : float
+        The change in pore pressure between the pre- and post-operation
+        conditions
+
+    Parameters
+    ----------
+    preOp_stress_state : A `SOSAT.StressState` object
+        The stress state to use to make the evaluation
+    gamma_dist : an object derived from `scipy.stats.rv_continuous`
+        A probability distribution for the stress path coefficient
+    dP : float
+        The change in pore pressure between the pre- and post-operation
+        conditions.
+    pressure_unit : str, optional
+        Unit of measurement for pressure, see list of units in pint
+        package documentation
+
+    Notes
+    -----
+    This is a subclass of StressState. Objects will have all attributes of 
+    StressState class, with additional attributes listed above.
+
+    Examples
+    --------
+    To compute and plot the post-operation posterior distribution at a 
+    point with a frictional faulting constraint, you would do the 
+    following:
+
+    >>> from SOSAT import StressState
+    >>> from SOSAT import PostOpStressState
+    >>> from SOSAT.constraints import FaultConstraint
+    >>> from scipy.stats import uniform
+    >>> ss = StressState(1.0,
+                         2.5,
+                         0.3,
+                         depth_unit='km',
+                         density_unit='g/cm^3',
+                         pressure_unit='MPa')
+
+    >>> sigv = ss.vertical_stress
+    >>> fc = FaultConstraint()
+    >>> ss.add_constraint(fc)
+    >>> gamma_dist = uniform(0.4,(0.6-0.4))
+    >>> dP = 15.0 # MPa
+    >>> postOp_ss = PostOpStressState(ss, gamma_dist, dP)
+    >>> fig = postOp_ss.plot_posterior()
+    >>> plt.savefig("postOp_posterior.png")
+
+    """
+    def __init__(self,
+                 preOp_stress_state,
+                 gamma_dist,
+                 dP,
+                 pressure_unit='MPa'):
+
+        """
+        Constructor method
+        """
+        self._posterior_evaluated = False
+        self.preOp_stress_state = preOp_stress_state
+        self.gamma_dist = gamma_dist
+        self.dP = dP
+        self.stress_unit = preOp_stress_state.stress_unit
+        self.depth = preOp_stress_state.depth
+        self.depth_unit = preOp_stress_state.depth_unit
+        self._avg_overburden_density = \
+            preOp_stress_state._avg_overburden_density
+        self._constraints = preOp_stress_state._constraints
+        self.pore_pressure = preOp_stress_state.pore_pressure
+
+
+        # Evaluate the pre-opertaion stress state posterior if not
+        # already done
+        if not self.preOp_stress_state._posterior_evaluated:
+            self.preOp_stress_state.evaluate_posterior()
+
+        # Assuming constant vertical stress, as we have in the risk
+        # analysis components of SOSAT
+        self.vertical_stress = preOp_stress_state.vertical_stress
+
+        # Convert dP to stress unit in the case that it was passed in 
+        # with a different unit
+        self.dP = dP * units(pressure_unit)
+        self.dP = self.dP.to(preOp_stress_state.stress_unit).magnitude
+
+        # Find minimum and maximum post-operation stresses to consider
+        # If gamma_dist is uniform, use the min and max values
+        # Otherwise, use 3 SD above and below mean
+        if isinstance(gamma_dist.dist, type(scipy.stats.uniform)):
+            self._minimum_stress = preOp_stress_state._minimum_stress + \
+                (self.gamma_dist.mean() - np.sqrt(3.0) * \
+                self.gamma_dist.std()) * self.dP
+            self._maximum_stress = preOp_stress_state._maximum_stress + \
+                (self.gamma_dist.mean() + np.sqrt(3.0) * \
+                self.gamma_dist.std()) * self.dP
+        else:
+            self._minimum_stress = preOp_stress_state._minimum_stress + \
+                (self.gamma_dist.mean() - 3.0 * self.gamma_dist.std()) \
+                * self.dP
+            self._maximum_stress = preOp_stress_state._maximum_stress + \
+                (self.gamma_dist.mean() + 3.0 * self.gamma_dist.std()) \
+                 * self.dP
+
+        # A vector containing the center of each stress bin considered
+        nbins = np.shape(self.preOp_stress_state.posterior)[0]
+        sigvec = np.linspace(self._minimum_stress,
+                             self._maximum_stress,
+                             nbins)
+
+        # Create a meshgrid object holding each possible stress state
+        shmax_grid, shmin_grid = np.meshgrid(sigvec, sigvec)
+
+        # Now create a masked array with the states where the minimum
+        # horizontal stress is less than the maximum horizontal stress
+        # masked out
+        mask = shmin_grid > shmax_grid
+
+        self.shmin_grid = ma.MaskedArray(shmin_grid, mask=mask)
+        self.shmax_grid = ma.MaskedArray(shmax_grid, mask=mask)
+
+    def evaluate_posterior(self):
+        '''
+        This will be a new method based on our conceptual framework
+        For now just leaving it the same as pre-operation posterior
+        '''
+            
+        self.posterior = self.preOp_stress_state.posterior
+        self._posterior_evaluated = True
