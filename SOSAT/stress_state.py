@@ -393,8 +393,8 @@ class StressState:
             self.evaluate_posterior()
 
         # Convert data format to bin-centered eval of PDF for plotting
-        dsig = self.shmax_grid[0][1]-self.shmax_grid[0][0]
-        posterior_PDF = self.posterior/dsig**2.0
+        dsig = self.shmax_grid[0][1] - self.shmax_grid[0][0]
+        posterior_PDF = self.posterior / dsig**2.0
 
         fig = plt.figure(figsize=(figwidth, figheight))
         ax = fig.add_subplot(111)
