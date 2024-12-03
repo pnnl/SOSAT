@@ -195,7 +195,6 @@ class StressState:
 
         self.shmin_grid = ma.MaskedArray(shmin_grid, mask=mask)
         self.shmax_grid = ma.MaskedArray(shmax_grid, mask=mask)
-        self.dsig = sigvec[1] - sigvec[0]
         # posterior stress distribution, initialized to the
         # uninformative prior where all compressive states are equally
         # likely
@@ -485,12 +484,13 @@ class StressState:
         i_high = np.argmax(shmax_cdf > confidence)
         return sigvec[i_low], sigvec[i_high]
 
+
 class PostOpStressState(StressState):
     """
     A class to contain all data necessary to define the probability
     distribution for all possible stress states at a given point in the
     subsurface at some given post-operation state with a deterministic
-    change in pore pressure. 
+    change in pore pressure.
     Attributes
     ----------
     preOp_stress_state : A `SOSAT.StressState` object
@@ -516,13 +516,13 @@ class PostOpStressState(StressState):
 
     Notes
     -----
-    This is a subclass of StressState. Objects will have all attributes of 
+    This is a subclass of StressState. Objects will have all attributes of
     StressState class, with additional attributes listed above.
 
     Examples
     --------
-    To compute and plot the post-operation posterior distribution at a 
-    point with a frictional faulting constraint, you would do the 
+    To compute and plot the post-operation posterior distribution at a
+    point with a frictional faulting constraint, you would do the
     following:
 
     >>> from SOSAT import StressState
@@ -558,7 +558,6 @@ class PostOpStressState(StressState):
         self._posterior_evaluated = False
         self.preOp_stress_state = preOp_stress_state
         self.gamma_dist = gamma_dist
-        self.dP = dP
         self.stress_unit = preOp_stress_state.stress_unit
         self.depth = preOp_stress_state.depth
         self.depth_unit = preOp_stress_state.depth_unit
@@ -576,7 +575,7 @@ class PostOpStressState(StressState):
         # analysis components of SOSAT
         self.vertical_stress = preOp_stress_state.vertical_stress
 
-        # Convert dP to stress unit in the case that it was passed in 
+        # Convert dP to stress unit in the case that it was passed in
         # with a different unit
         self.dP = dP * units(pressure_unit)
         self.dP = self.dP.to(preOp_stress_state.stress_unit).magnitude
@@ -584,31 +583,39 @@ class PostOpStressState(StressState):
         # Find minimum and maximum post-operation stresses to consider
         # If gamma_dist is uniform, use the min and max values
         # Otherwise, use 3 SD above and below mean
-        # if isinstance(gamma_dist.dist, type(scipy.stats.uniform)):
-        #     self._minimum_stress = preOp_stress_state._minimum_stress + \
-        #         (self.gamma_dist.mean() - np.sqrt(3.0) * \
-        #         self.gamma_dist.std()) * self.dP
-        #     self._maximum_stress = preOp_stress_state._maximum_stress + \
-        #         (self.gamma_dist.mean() + np.sqrt(3.0) * \
-        #         self.gamma_dist.std()) * self.dP
-        # else:
-        #     self._minimum_stress = preOp_stress_state._minimum_stress + \
-        #         (self.gamma_dist.mean() - 3.0 * self.gamma_dist.std()) \
-        #         * self.dP
-        #     self._maximum_stress = preOp_stress_state._maximum_stress + \
-        #         (self.gamma_dist.mean() + 3.0 * self.gamma_dist.std()) \
-        #          * self.dP
-        
-        print("I think this currently assumes injection!")
-        # Should we use just self.dP?
-        # What if gamma > 1.0?
-
-        self._minimum_stress = self.preOp_stress_state._minimum_stress
-        self._maximum_stress = self.preOp_stress_state._maximum_stress + self.dP
+        if isinstance(gamma_dist.dist, type(scipy.stats.uniform)):
+            delSigma_small = (self.gamma_dist.mean() - np.sqrt(3.0) *
+                              self.gamma_dist.std()) * self.dP
+            delSigma_large = (self.gamma_dist.mean() + np.sqrt(3.0) *
+                              self.gamma_dist.std()) * self.dP
+            if self.dP >= 0.0:
+                self._minimum_stress = preOp_stress_state._minimum_stress + \
+                                       delSigma_small
+                self._maximum_stress = preOp_stress_state._maximum_stress + \
+                                       delSigma_large
+            else:
+                self._minimum_stress = preOp_stress_state._minimum_stress + \
+                                       delSigma_large
+                self._maximum_stress = preOp_stress_state._maximum_stress + \
+                                       delSigma_small
+        else:
+            delSigma_small = (self.gamma_dist.mean() - 3.0 *
+                              self.gamma_dist.std()) * self.dP
+            delSigma_large = (self.gamma_dist.mean() + 3.0 *
+                              self.gamma_dist.std()) * self.dP
+            if self.dP >= 0.0:
+                self._minimum_stress = preOp_stress_state._minimum_stress + \
+                                       delSigma_small
+                self._maximum_stress = preOp_stress_state._maximum_stress + \
+                                       delSigma_large
+            else:
+                self._minimum_stress = preOp_stress_state._minimum_stress + \
+                                       delSigma_large
+                self._maximum_stress = preOp_stress_state._maximum_stress + \
+                                       delSigma_small
 
         # A vector containing the center of each stress bin considered
         nbins = np.shape(self.preOp_stress_state.posterior)[0]
-        print("nbins in preOp_stress_state = ",nbins)
         sigvec = np.linspace(self._minimum_stress,
                              self._maximum_stress,
                              nbins)
@@ -623,7 +630,6 @@ class PostOpStressState(StressState):
 
         self.shmin_grid = ma.MaskedArray(shmin_grid, mask=mask)
         self.shmax_grid = ma.MaskedArray(shmax_grid, mask=mask)
-        self.dsig = sigvec[1] - sigvec[0]
 
     def evaluate_posterior(self):
         '''
@@ -638,73 +644,65 @@ class PostOpStressState(StressState):
         self.posterior = np.zeros_like(self.shmax_grid)
         self.posterior = ma.MaskedArray(self.posterior, mask=mask)
 
-        # # Evaluate the change in stress PDF using the gamma distribution
-        # # and the deterministic change in pressure
-        # I am not sure this method will work, because it will be difficult to create the dss_dist for any gamma dist
-
-        # dss_dist = self.gamma_dist.dist(self.dP * self.gamma_dist.args[0], np.abs(self.dP) * self.gamma_dist.args[1])
-
-        # fig, ax = plt.subplots(2, 1)
-        # x_gamma = np.linspace(self.gamma_dist.ppf(0.01),self.gamma_dist.ppf(0.99), 1000)
-        # x_dss = np.linspace(dss_dist.ppf(0.01),dss_dist.ppf(0.99), 1000)
-        # ax[1].plot(x_gamma, self.gamma_dist.pdf(x_gamma), 'k-', lw=2)
-        # ax[0].plot(x_dss, dss_dist.pdf(x_dss), 'k-', lw=2)
-        # plt.show()
-        # lkj
-
         # Find the minimum and maximum gamma value to consider
-        # if isinstance(self.gamma_dist.dist, type(scipy.stats.uniform)):
-        #     min_gamma = self.gamma_dist.ppf(0.0)
-        #     max_gamma = self.gamma_dist.ppf(1.0)
-        # else:
-        #     min_gamma = self.gamma_dist.ppf(0.001)
-        #     max_gamma = self.gamma_dist.ppf(0.999)
-        min_gamma = 0.0
-        max_gamma = 1.0
-
-        # Find all the pairs of stress states in the post-operation PDF
-        post_sig_pairs = list(zip(self.shmax_grid.data.ravel(),self.shmin_grid.data.ravel()))
+        if isinstance(self.gamma_dist.dist, type(scipy.stats.uniform)):
+            min_gamma = (self.gamma_dist.mean() -
+                         np.sqrt(3.0) * self.gamma_dist.std())
+            max_gamma = (self.gamma_dist.mean() +
+                         np.sqrt(3.0) * self.gamma_dist.std())
+        else:
+            min_gamma = (self.gamma_dist.mean() - 3.0 * self.gamma_dist.std())
+            max_gamma = (self.gamma_dist.mean() + 3.0 * self.gamma_dist.std())
 
         # Find all the pairs of stress states in the pre-operation PDF
-        pre_sig_pairs = list(zip(self.preOp_stress_state.shmax_grid.data.ravel(),self.preOp_stress_state.shmin_grid.data.ravel()))
+        pre_sig_pairs = list(zip(
+                        self.preOp_stress_state.shmax_grid.data.ravel(),
+                        self.preOp_stress_state.shmin_grid.data.ravel()))
 
         # Find associated probabilities in the pre-operation PDF
         # Convert data to PDF format
-        pre_posterior = list(self.preOp_stress_state.posterior.data.ravel()/self.preOp_stress_state.dsig**2)
+        preOp_dsig = self.preOp_stress_state.shmax_grid[0][1] \
+                   - self.preOp_stress_state.shmax_grid[0][0]
+        pre_posterior = list(
+                        self.preOp_stress_state.posterior.data.ravel() /
+                        preOp_dsig**2)
 
-        # Loop over postOp_stress_state posterior space
-        for sig_point in post_sig_pairs:
-            shmax_point = sig_point[0]
-            shmin_point = sig_point[1]
-            posterior_indices = np.where((self.shmax_grid == shmax_point) & (self.shmin_grid == shmin_point))
-            
-            # Loop over the gamma dist space
-            N_gamma = 50
-            d_gamma = (max_gamma - min_gamma)/N_gamma
-            d_dss = d_gamma*self.dP
-            for gamma in [(2*i+1)*d_gamma/2.0+min_gamma for i in range(N_gamma)]:
-                gamma_prob = self.gamma_dist.pdf(gamma)
-                dss_prob = gamma_prob/self.dP
+        # Loop over the gamma dist space
+        N_gamma = 50
+        d_gamma = (max_gamma - min_gamma) / N_gamma
+        gamma_range = [(2 * i + 1) * d_gamma / 2 + min_gamma
+                       for i in range(N_gamma)]
+        for gamma in gamma_range:
 
-                # Find the required pre-operation stress state
-                shmax_preOp = shmax_point - gamma * self.dP
-                shmin_preOp = shmin_point - gamma * self.dP
+            gamma_prob = self.gamma_dist.pdf(gamma)
+            dss_prob = gamma_prob / np.abs(self.dP)
 
-                # Find the probability of the pre-operation ss using nearest neighbor interpolation
-                if (shmin_preOp < self.preOp_stress_state._minimum_stress) or (shmax_preOp > self.preOp_stress_state._maximum_stress):
-                    preOp_prob = 0.0
-                else:
-                    diff, index = KDTree(pre_sig_pairs).query([(shmax_preOp,shmin_preOp)]) 
-                    preOp_prob = pre_posterior[index[0]]
+            # Find the required pre-operation stress state
+            shmax_preOp = self.shmax_grid - gamma * self.dP
+            shmin_preOp = self.shmin_grid - gamma * self.dP
+            preOp_pairs = list(zip(shmax_preOp.data.ravel(),
+                                   shmin_preOp.data.ravel()))
 
-                # diff, index = KDTree(pre_sig_pairs).query([(shmax_preOp,shmin_preOp)]) 
-                # preOp_prob = pre_posterior[index[0]]
+            # Find the probability of the pre-operation ss
+            # Using nearest neighbor interpolation
+            index = KDTree(pre_sig_pairs).query(preOp_pairs)
+            preOp_prob = [pre_posterior[index[1][i]]
+                          for i in range(len(index[1]))]
+            preOp_prob = np.reshape(preOp_prob, np.shape(self.shmax_grid))
 
-                # Sum the probabilities of all possible paths to the post-operation state
-                self.posterior[posterior_indices[0],posterior_indices[1]] += dss_prob*preOp_prob*d_dss
+            # Update preOp_prob to 0 for any point outside of preOp ss space
+            preOp_prob[np.array(shmin_preOp <
+                       self.preOp_stress_state._minimum_stress) |
+                       np.array(shmax_preOp >
+                       self.preOp_stress_state._maximum_stress)] = 0.0
+
+            # Sum the probabilities of all possible paths
+            self.posterior += dss_prob * preOp_prob * \
+                              (d_gamma * np.abs(self.dP))
 
         # Convert data in posterior to store total probability in each bin
         # This mimics the data format in the posterior of StressState
-        self.posterior *= self.dsig**2
+        postOp_dsig = self.shmax_grid[0][1] - self.shmax_grid[0][0]
+        self.posterior *= postOp_dsig**2
 
         self._posterior_evaluated = True
