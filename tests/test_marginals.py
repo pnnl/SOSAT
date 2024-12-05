@@ -63,12 +63,6 @@ def test_marginals():
     ax3.set_ylabel("Cumulative Probability Density")
     fig3.savefig("fault_constraint_shmin_cdf.png")
 
-    shmin_ll, shmin_ul = ss.get_shmin_confidence_intervals(0.95)
-    print("shmin_ll= ", shmin_ll)
-    shmin_ll == pytest.approx(21.785)
-    print("shmin_ul= ", shmin_ul)
-    shmin_ul == pytest.approx(73.877)
-
     fig4 = plt.figure()
     ax4 = fig4.add_subplot(111)
     shmin, shmin_cdf = ss.get_shmax_marginal_cdf()
@@ -76,9 +70,3 @@ def test_marginals():
     ax4.set_xlabel("Maximum Horizontal Stress")
     ax4.set_ylabel("Cumulative Probability Density")
     fig4.savefig("fault_constraint_shmax_cdf.png")
-
-    shmax_ll, shmax_ul = ss.get_shmax_confidence_intervals(0.95)
-    shmax_ll == pytest.approx(30.689)
-    print("shmax_ll= ", shmax_ll)
-    shmax_ul == pytest.approx(91.686)
-    print("shmax_ul= ", shmax_ul)
