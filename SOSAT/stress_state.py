@@ -469,8 +469,10 @@ class StressState:
         """
 
         sigvec, shmin_cdf = self.get_shmin_marginal_cdf()
-        i_low = np.argmax(shmin_cdf > (1.0 - confidence))
-        i_high = np.argmax(shmin_cdf > confidence)
+        lower_probability = min(confidence, (1.0 - confidence))
+        upper_probability = max(confidence, (1.0 - confidence))
+        i_low = np.argmax(shmin_cdf > lower_probability)
+        i_high = np.argmax(shmin_cdf > upper_probability)
         return sigvec[i_low], sigvec[i_high]
 
     def get_shmax_confidence_intervals(self, confidence):
@@ -482,6 +484,8 @@ class StressState:
         """
 
         sigvec, shmax_cdf = self.get_shmax_marginal_cdf()
-        i_low = np.argmax(shmax_cdf > (1.0 - confidence))
-        i_high = np.argmax(shmax_cdf > confidence)
+        lower_probability = min(confidence, (1.0 - confidence))
+        upper_probability = max(confidence, (1.0 - confidence))
+        i_low = np.argmax(shmax_cdf > lower_probability)
+        i_high = np.argmax(shmax_cdf > upper_probability)
         return sigvec[i_low], sigvec[i_high]
