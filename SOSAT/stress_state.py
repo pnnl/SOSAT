@@ -588,10 +588,10 @@ class PostOpStressState(StressState):
         # If gamma_dist is uniform, use the min and max values
         # Otherwise, use 3 SD above and below mean
         if isinstance(gamma_dist.dist, type(scipy.stats.uniform)):
-            delSigma_small = (self.gamma_dist.mean() - np.sqrt(3.0) *
-                              self.gamma_dist.std()) * self.dP
-            delSigma_large = (self.gamma_dist.mean() + np.sqrt(3.0) *
-                              self.gamma_dist.std()) * self.dP
+            delSigma_small = (self.gamma_dist.mean() - np.sqrt(3.0)
+                              * self.gamma_dist.std()) * self.dP
+            delSigma_large = (self.gamma_dist.mean() + np.sqrt(3.0)
+                              * self.gamma_dist.std()) * self.dP
             if self.dP >= 0.0:
                 self._minimum_stress = preOp_stress_state._minimum_stress + \
                                        delSigma_small
@@ -603,10 +603,10 @@ class PostOpStressState(StressState):
                 self._maximum_stress = preOp_stress_state._maximum_stress + \
                                        delSigma_small
         else:
-            delSigma_small = (self.gamma_dist.mean() - 3.0 *
-                              self.gamma_dist.std()) * self.dP
-            delSigma_large = (self.gamma_dist.mean() + 3.0 *
-                              self.gamma_dist.std()) * self.dP
+            delSigma_small = (self.gamma_dist.mean() - 3.0
+                              * self.gamma_dist.std()) * self.dP
+            delSigma_large = (self.gamma_dist.mean() + 3.0
+                              * self.gamma_dist.std()) * self.dP
             if self.dP >= 0.0:
                 self._minimum_stress = preOp_stress_state._minimum_stress + \
                                        delSigma_small
@@ -650,10 +650,10 @@ class PostOpStressState(StressState):
 
         # Find the minimum and maximum gamma value to consider
         if isinstance(self.gamma_dist.dist, type(scipy.stats.uniform)):
-            min_gamma = (self.gamma_dist.mean() -
-                         np.sqrt(3.0) * self.gamma_dist.std())
-            max_gamma = (self.gamma_dist.mean() +
-                         np.sqrt(3.0) * self.gamma_dist.std())
+            min_gamma = (self.gamma_dist.mean()
+                         - np.sqrt(3.0) * self.gamma_dist.std())
+            max_gamma = (self.gamma_dist.mean()
+                         + np.sqrt(3.0) * self.gamma_dist.std())
         else:
             min_gamma = (self.gamma_dist.mean() - 3.0 * self.gamma_dist.std())
             max_gamma = (self.gamma_dist.mean() + 3.0 * self.gamma_dist.std())
@@ -668,8 +668,8 @@ class PostOpStressState(StressState):
         preOp_dsig = self.preOp_stress_state.shmax_grid[0][1] \
                    - self.preOp_stress_state.shmax_grid[0][0]
         pre_posterior = list(
-                        self.preOp_stress_state.posterior.data.ravel() /
-                        preOp_dsig**2)
+                        self.preOp_stress_state.posterior.data.ravel()
+                        / preOp_dsig**2)
 
         # Loop over the gamma dist space
         N_gamma = 50
@@ -695,10 +695,11 @@ class PostOpStressState(StressState):
             preOp_prob = np.reshape(preOp_prob, np.shape(self.shmax_grid))
 
             # Update preOp_prob to 0 for any point outside of preOp ss space
-            preOp_prob[np.array(shmin_preOp <
-                       self.preOp_stress_state._minimum_stress) |
-                       np.array(shmax_preOp >
-                       self.preOp_stress_state._maximum_stress)] = 0.0
+            preOp_prob[np.array(shmin_preOp
+                       < self.preOp_stress_state._minimum_stress)
+                       | np.array(shmax_preOp
+                       > self.preOp_stress_state._maximum_stress)] \
+                       = 0.0
 
             # Sum the probabilities of all possible paths
             self.posterior += dss_prob * preOp_prob * \
