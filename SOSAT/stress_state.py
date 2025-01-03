@@ -517,11 +517,17 @@ class PostOpStressState(StressState):
     pressure_unit : str, optional
         Unit of measurement for pressure, see list of units in pint
         package documentation
+    N_gamma : int, optional
+        The number of steps taken in the gamma space for the numiercal
+        integration in the convolution of the gamma and stress state PDFs
 
     Notes
     -----
     This is a subclass of StressState. Objects will have all attributes of
-    StressState class, with additional attributes listed above.
+    StressState class, with additional attributes listed above. In this 
+    approach, SOSAT assumes a perfectl linear elastic behavior, even after
+    the stress state has reached the Mohr-Coulomb failure envelope. This
+    is consistent with the risk analysis approach of SOSAT. 
 
     Examples
     --------
@@ -554,7 +560,8 @@ class PostOpStressState(StressState):
                  preOp_stress_state,
                  gamma_dist,
                  dP,
-                 pressure_unit='MPa'):
+                 pressure_unit='MPa',
+                 N_gamma=50):
 
         """
         Constructor method
@@ -563,6 +570,7 @@ class PostOpStressState(StressState):
         self.preOp_stress_state = preOp_stress_state
         self.gamma_dist = gamma_dist
         self.stress_unit = preOp_stress_state.stress_unit
+        self.N_gamma = N_gamma
         self.depth = preOp_stress_state.depth
         self.depth_unit = preOp_stress_state.depth_unit
         self._avg_overburden_density = \
@@ -586,12 +594,12 @@ class PostOpStressState(StressState):
 
         # Find minimum and maximum post-operation stresses to consider
         # If gamma_dist is uniform, use the min and max values
-        # Otherwise, use 3 SD above and below mean
-        if isinstance(gamma_dist.dist, type(scipy.stats.uniform)):
-            delSigma_small = (self.gamma_dist.mean() - np.sqrt(3.0)
-                              * self.gamma_dist.std()) * self.dP
-            delSigma_large = (self.gamma_dist.mean() + np.sqrt(3.0)
-                              * self.gamma_dist.std()) * self.dP
+        # Otherwise, use 99% confidence intervals
+        if isinstance(self.gamma_dist.dist, type(scipy.stats.uniform)):
+            min_gamma = self.gamma_dist.ppf(0.0)
+            max_gamma = self.gamma_dist.ppf(1.0)
+            delSigma_small = min_gamma * self.dP
+            delSigma_large = max_gamma * self.dP
             if self.dP >= 0.0:
                 self._minimum_stress = preOp_stress_state._minimum_stress + \
                                        delSigma_small
@@ -603,10 +611,9 @@ class PostOpStressState(StressState):
                 self._maximum_stress = preOp_stress_state._maximum_stress + \
                                        delSigma_small
         else:
-            delSigma_small = (self.gamma_dist.mean() - 3.0
-                              * self.gamma_dist.std()) * self.dP
-            delSigma_large = (self.gamma_dist.mean() + 3.0
-                              * self.gamma_dist.std()) * self.dP
+            min_gamma, max_gamma = self.gamma_dist.interval(0.99)
+            delSigma_small = min_gamma * self.dP
+            delSigma_large = max_gamma * self.dP
             if self.dP >= 0.0:
                 self._minimum_stress = preOp_stress_state._minimum_stress + \
                                        delSigma_small
@@ -648,16 +655,6 @@ class PostOpStressState(StressState):
         self.posterior = np.zeros_like(self.shmax_grid)
         self.posterior = ma.MaskedArray(self.posterior, mask=mask)
 
-        # Find the minimum and maximum gamma value to consider
-        if isinstance(self.gamma_dist.dist, type(scipy.stats.uniform)):
-            min_gamma = (self.gamma_dist.mean()
-                         - np.sqrt(3.0) * self.gamma_dist.std())
-            max_gamma = (self.gamma_dist.mean()
-                         + np.sqrt(3.0) * self.gamma_dist.std())
-        else:
-            min_gamma = (self.gamma_dist.mean() - 3.0 * self.gamma_dist.std())
-            max_gamma = (self.gamma_dist.mean() + 3.0 * self.gamma_dist.std())
-
         # Find all the pairs of stress states in the pre-operation PDF
         pre_sig_pairs = list(zip(
                         self.preOp_stress_state.shmax_grid.data.ravel(),
@@ -671,11 +668,19 @@ class PostOpStressState(StressState):
                         self.preOp_stress_state.posterior.data.ravel()
                         / preOp_dsig**2)
 
+        # Find minimum and maximum gamma values
+        # If gamma_dist is uniform, use the min and max values
+        # Otherwise, use 99% confidence intervals
+        if isinstance(self.gamma_dist.dist, type(scipy.stats.uniform)):
+            min_gamma = self.gamma_dist.ppf(0.0)
+            max_gamma = self.gamma_dist.ppf(1.0)
+        else:
+            min_gamma, max_gamma = self.gamma_dist.interval(0.99)
+
         # Loop over the gamma dist space
-        N_gamma = 50
-        d_gamma = (max_gamma - min_gamma) / N_gamma
+        d_gamma = (max_gamma - min_gamma) / self.N_gamma
         gamma_range = [(2 * i + 1) * d_gamma / 2 + min_gamma
-                       for i in range(N_gamma)]
+                       for i in range(self.N_gamma)]
         for gamma in gamma_range:
 
             gamma_prob = self.gamma_dist.pdf(gamma)
